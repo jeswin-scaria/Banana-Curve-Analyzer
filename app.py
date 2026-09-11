@@ -8,6 +8,7 @@ dynamic reactive SVG mascot, interactive curvature sandbox, and downloadable IBB
 import os
 import json
 import time
+import base64
 from typing import Dict, Any
 import numpy as np
 import streamlit as st
@@ -41,7 +42,7 @@ st.set_page_config(
 # -----------------------------------------------------------------------------
 # UI/UX Pro Max Design System & Global Styles
 # -----------------------------------------------------------------------------
-st.markdown(
+st.html(
     """
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
@@ -76,23 +77,16 @@ st.markdown(
     }
 
     /* Top Navigation Header */
-    .nav-container {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding-bottom: 1.2rem;
-        border-bottom: 1px solid var(--border-subtle);
-        margin-bottom: 1.5rem;
-    }
-
     .brand-logo {
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 14px;
+        margin-bottom: 0.5rem;
     }
 
     .brand-title {
-        font-size: 2.5rem;
+        font-family: var(--font-display);
+        font-size: 2.6rem;
         font-weight: 900;
         letter-spacing: -0.8px;
         background: linear-gradient(135deg, #fef08a 0%, #facc15 35%, #f59e0b 70%, #ea580c 100%);
@@ -112,12 +106,12 @@ st.markdown(
     .status-pill {
         display: inline-flex;
         align-items: center;
-        gap: 6px;
+        gap: 8px;
         background: rgba(56, 189, 248, 0.12);
         color: var(--tech-cyan);
         border: 1px solid rgba(56, 189, 248, 0.3);
         border-radius: 9999px;
-        padding: 4px 14px;
+        padding: 5px 16px;
         font-size: 0.8rem;
         font-weight: 700;
         text-transform: uppercase;
@@ -142,6 +136,7 @@ st.markdown(
         padding: 20px;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
         transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s ease, box-shadow 0.2s ease;
+        margin-bottom: 10px;
     }
 
     .bento-card:hover {
@@ -289,8 +284,7 @@ st.markdown(
         margin-bottom: 10px;
     }
     </style>
-    """,
-    unsafe_allow_html=True,
+    """
 )
 
 
@@ -334,27 +328,23 @@ def get_personality_profile(curve_score: float) -> Dict[str, str]:
 def render_svg_mascot(curve_score: float) -> str:
     """
     Renders an animated SVG cartoon banana mascot whose body physically
-    bends according to the actual Curve Score.
+    bends according to the actual Curve Score, returned as a Base64 data URI img tag.
     """
     bend_factor = float(np.clip(curve_score * 3.4 + 10, 10, 95))
     profile = get_personality_profile(curve_score)
 
     if profile["mood"] == "straight":
         face_svg = """
-        <!-- Serious Eyebrows & Stiff Eyes -->
         <line x1="85" y1="120" x2="105" y2="125" stroke="#451a03" stroke-width="4" stroke-linecap="round" />
         <line x1="115" y1="125" x2="135" y2="120" stroke="#451a03" stroke-width="4" stroke-linecap="round" />
         <circle cx="95" cy="133" r="5" fill="#1e293b" />
         <circle cx="125" cy="133" r="5" fill="#1e293b" />
-        <!-- Firm Straight Mouth -->
         <line x1="95" y1="155" x2="125" y2="155" stroke="#451a03" stroke-width="4" stroke-linecap="round" />
-        <!-- Golden Monocle -->
         <circle cx="125" cy="133" r="12" stroke="#f59e0b" stroke-width="3" fill="rgba(245, 158, 11, 0.18)" />
         <path d="M 137 135 Q 145 155 130 170" stroke="#f59e0b" stroke-width="2" fill="none" />
         """
     elif profile["mood"] == "curved":
         face_svg = """
-        <!-- Cool Sunglasses -->
         <polygon points="80,122 108,122 104,142 84,142" fill="#0f172a" />
         <polygon points="112,122 140,122 136,142 116,142" fill="#0f172a" />
         <line x1="108" y1="126" x2="112" y2="126" stroke="#0f172a" stroke-width="4" />
@@ -362,78 +352,48 @@ def render_svg_mascot(curve_score: float) -> str:
         <line x1="140" y1="125" x2="145" y2="125" stroke="#0f172a" stroke-width="3" />
         <line x1="86" y1="126" x2="100" y2="136" stroke="#38bdf8" stroke-width="2" />
         <line x1="118" y1="126" x2="132" y2="136" stroke="#38bdf8" stroke-width="2" />
-        <!-- Smirk -->
         <path d="M 95 154 Q 110 168 128 156" stroke="#451a03" stroke-width="4" fill="none" stroke-linecap="round" />
         """
     else:
         face_svg = """
-        <!-- Dizzy Spiral Eyes -->
         <circle cx="95" cy="128" r="10" fill="#ffffff" stroke="#451a03" stroke-width="2" />
         <circle cx="125" cy="128" r="10" fill="#ffffff" stroke="#451a03" stroke-width="2" />
         <circle cx="95" cy="128" r="4.5" fill="#ef4444" />
         <circle cx="125" cy="128" r="4.5" fill="#ef4444" />
         <path d="M 85 116 Q 95 106 105 116" stroke="#451a03" stroke-width="3" fill="none" stroke-linecap="round" />
         <path d="M 115 116 Q 125 106 135 116" stroke="#451a03" stroke-width="3" fill="none" stroke-linecap="round" />
-        <!-- Wide Cheerful Screaming Mouth -->
         <ellipse cx="110" cy="155" rx="14" ry="12" fill="#7f1d1d" stroke="#451a03" stroke-width="3" />
         <ellipse cx="110" cy="160" rx="9" ry="6" fill="#f43f5e" />
-        <!-- Sweat droplet -->
         <path d="M 148 112 Q 154 107 156 115 Q 156 122 148 119 Z" fill="#38bdf8" />
         """
 
     ctrl_x = 110 + bend_factor
     back_ctrl_x = 75 + bend_factor
 
-    svg_code = f"""
-    <div style="display: flex; justify-content: center; align-items: center; margin: 10px 0;">
-    <svg width="240" height="270" viewBox="0 0 240 270" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-            <linearGradient id="bananaGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#fef08a" />
-                <stop offset="60%" stop-color="#facc15" />
-                <stop offset="100%" stop-color="#eab308" />
-            </linearGradient>
-            <filter id="bananaGlow" x="-20%" y="-20%" width="140%" height="140%">
-                <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#f59e0b" flood-opacity="0.4" />
-            </filter>
-        </defs>
+    svg_markup = f'''<svg width="240" height="270" viewBox="0 0 240 270" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="bananaGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+<stop offset="0%" stop-color="#fef08a" />
+<stop offset="60%" stop-color="#facc15" />
+<stop offset="100%" stop-color="#eab308" />
+</linearGradient>
+<filter id="bananaGlow" x="-20%" y="-20%" width="140%" height="140%">
+<feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#f59e0b" flood-opacity="0.4" />
+</filter>
+</defs>
+<path d="M 110 35 Q {ctrl_x} 140 105 245 Q {back_ctrl_x} 140 100 35 Z" fill="url(#bananaGradient)" stroke="#b45309" stroke-width="4" filter="url(#bananaGlow)" stroke-linejoin="round" />
+<path d="M 106 42 Q {ctrl_x - 12} 140 103 235" stroke="#fef9c3" stroke-width="3.5" fill="none" stroke-linecap="round" opacity="0.85" />
+<path d="M 100 35 L 110 35 L 113 18 L 97 18 Z" fill="#65a30d" stroke="#365314" stroke-width="3" />
+<ellipse cx="105" cy="18" rx="8" ry="3.5" fill="#365314" />
+<ellipse cx="105" cy="245" rx="5.5" ry="4" fill="#713f12" />
+<ellipse cx="{ctrl_x - 25}" cy="85" rx="4" ry="3" fill="#854d0e" opacity="0.6" />
+<ellipse cx="{ctrl_x - 15}" cy="190" rx="5" ry="3.5" fill="#854d0e" opacity="0.6" />
+<ellipse cx="{ctrl_x - 30}" cy="215" rx="3" ry="2" fill="#854d0e" opacity="0.5" />
+{face_svg}
+</svg>'''
 
-        <!-- Reactive Banana Body (Bezier Curve) -->
-        <path d="M 110 35 Q {ctrl_x} 140 105 245 Q {back_ctrl_x} 140 100 35 Z"
-              fill="url(#bananaGradient)"
-              stroke="#b45309"
-              stroke-width="4"
-              filter="url(#bananaGlow)"
-              stroke-linejoin="round" />
-
-        <!-- Centerline Highlight Spine -->
-        <path d="M 106 42 Q {ctrl_x - 12} 140 103 235"
-              stroke="#fef9c3"
-              stroke-width="3.5"
-              fill="none"
-              stroke-linecap="round"
-              opacity="0.85" />
-
-        <!-- Green Stem Top -->
-        <path d="M 100 35 L 110 35 L 113 18 L 97 18 Z"
-              fill="#65a30d"
-              stroke="#365314"
-              stroke-width="3" />
-        <ellipse cx="105" cy="18" rx="8" ry="3.5" fill="#365314" />
-
-        <!-- Dark Bottom Apex -->
-        <ellipse cx="105" cy="245" rx="5.5" ry="4" fill="#713f12" />
-
-        <!-- Peel Texture Specks -->
-        <ellipse cx="{ctrl_x - 25}" cy="85" rx="4" ry="3" fill="#854d0e" opacity="0.6" />
-        <ellipse cx="{ctrl_x - 15}" cy="190" rx="5" ry="3.5" fill="#854d0e" opacity="0.6" />
-        <ellipse cx="{ctrl_x - 30}" cy="215" rx="3" ry="2" fill="#854d0e" opacity="0.5" />
-
-        {face_svg}
-    </svg>
-    </div>
-    """
-    return svg_code
+    b64_svg = base64.b64encode(svg_markup.encode('utf-8')).decode('utf-8')
+    return f'<img src="data:image/svg+xml;base64,{b64_svg}" width="240" height="270" alt="Professor Peel Mascot" style="display:block; margin: 10px auto;" />'
 
 
 # -----------------------------------------------------------------------------
@@ -443,7 +403,7 @@ def main() -> None:
     # 1. Top Navigation Bar
     nav_left, nav_right = st.columns([3.8, 1.4])
     with nav_left:
-        st.markdown(
+        st.html(
             """
             <div class="brand-logo">
                 <span style="font-size: 2.8rem; line-height: 1;">🍌</span>
@@ -452,27 +412,25 @@ def main() -> None:
                     <div class="brand-subtitle">Computer vision laboratory & geometric curvature intelligence</div>
                 </div>
             </div>
-            """,
-            unsafe_allow_html=True,
+            """
         )
     with nav_right:
         st.markdown('<div style="text-align: right; padding-top: 10px;">', unsafe_allow_html=True)
         pitch_toggle = st.toggle("🎤 30s Judge Pitch", value=False, help="Open concise elevator pitch for judges.")
-        st.markdown(
+        st.html(
             """
             <div class="status-pill" style="margin-top: 6px;">
                 <div class="status-dot"></div> CV Engine v2.0 • Online
             </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
+            """
         )
+        st.markdown('</div>', unsafe_allow_html=True)
 
-    st.markdown("<hr style='border: 0; border-top: 1px solid rgba(255,255,255,0.08); margin: 0.8rem 0 1.5rem 0;'>", unsafe_allow_html=True)
+    st.html("<hr style='border: 0; border-top: 1px solid rgba(255,255,255,0.08); margin: 0.8rem 0 1.5rem 0;'>")
 
     # 2. Hackathon Pitch Mode Banner
     if pitch_toggle:
-        st.markdown(
+        st.html(
             """
             <div class="pitch-banner">
                 <div class="pitch-header">
@@ -484,8 +442,7 @@ def main() -> None:
                     <b>Impact:</b> Real-time, subpixel automated grading of fruit curvature into standardized industrial categories.
                 </div>
             </div>
-            """,
-            unsafe_allow_html=True,
+            """
         )
 
     # 3. Sidebar Configuration Station
@@ -610,7 +567,7 @@ def main() -> None:
         personality = get_personality_profile(result.curve_score)
 
         # 5. Dynamic Mascot Reaction Stage
-        st.markdown(
+        st.html(
             f"""
             <div class="mascot-stage">
                 <div class="speech-bubble">
@@ -620,21 +577,19 @@ def main() -> None:
                 <div class="mascot-title">{personality['title']}</div>
                 <div class="mascot-subtitle">Personality: <b>{personality['personality']}</b></div>
             </div>
-            """,
-            unsafe_allow_html=True,
+            """
         )
 
         # 6. Primary KPI Bento Grid
         kpi_col1, kpi_col2, kpi_col3, kpi_col4, kpi_col5 = st.columns(5)
         with kpi_col1:
-            st.markdown(
+            st.html(
                 f"""
                 <div class="bento-card" style="text-align: center;">
                     <div class="kpi-val" style="color: #facc15;">{result.curve_score:.2f}%</div>
                     <div class="kpi-lbl">Curve Score</div>
                 </div>
-                """,
-                unsafe_allow_html=True,
+                """
             )
         with kpi_col2:
             badge_cls = (
@@ -642,47 +597,43 @@ def main() -> None:
                 if result.category == CATEGORY_STRAIGHT
                 else ("badge-curved" if result.category == CATEGORY_CURVED else "badge-highly-curved")
             )
-            st.markdown(
+            st.html(
                 f"""
                 <div class="bento-card" style="text-align: center;">
                     <div class="{badge_cls}" style="margin-top: 6px;">{result.category}</div>
                     <div class="kpi-lbl">Category</div>
                 </div>
-                """,
-                unsafe_allow_html=True,
+                """
             )
         with kpi_col3:
-            st.markdown(
+            st.html(
                 f"""
                 <div class="bento-card" style="text-align: center;">
                     <div class="kpi-val">{result.path_length:.1f}<span class="kpi-unit">px</span></div>
                     <div class="kpi-lbl">Arc Path Length (L)</div>
                 </div>
-                """,
-                unsafe_allow_html=True,
+                """
             )
         with kpi_col4:
-            st.markdown(
+            st.html(
                 f"""
                 <div class="bento-card" style="text-align: center;">
                     <div class="kpi-val">{result.chord_distance:.1f}<span class="kpi-unit">px</span></div>
                     <div class="kpi-lbl">Chord Distance (D)</div>
                 </div>
-                """,
-                unsafe_allow_html=True,
+                """
             )
         with kpi_col5:
-            st.markdown(
+            st.html(
                 f"""
                 <div class="bento-card" style="text-align: center;">
                     <div class="kpi-val">{result.max_deflection:.1f}<span class="kpi-unit">px</span></div>
                     <div class="kpi-lbl">Max Deflection (Sagitta)</div>
                 </div>
-                """,
-                unsafe_allow_html=True,
+                """
             )
 
-        st.markdown("<br>", unsafe_allow_html=True)
+        st.html("<div style='height: 16px;'></div>")
 
         # 7. Laboratory Workstation Tabs
         tab_inspect, tab_lab, tab_cv, tab_cert, tab_math = st.tabs(
@@ -741,10 +692,10 @@ def main() -> None:
 
             sim_left, sim_right = st.columns([1, 1.4])
             with sim_left:
-                st.markdown(render_svg_mascot(sim_score), unsafe_allow_html=True)
+                st.html(render_svg_mascot(sim_score))
             with sim_right:
                 sim_data = get_personality_profile(sim_score)
-                st.markdown(
+                st.html(
                     f"""
                     <div class="bento-card">
                         <div style="font-size: 1.3rem; font-weight: 800; color: #facc15; margin-bottom: 8px;">
@@ -760,8 +711,7 @@ def main() -> None:
                             <b>Mathematical Principle:</b> As curvature increases, the perimeter arc distance ($L$) grows while the straight-line chord ($D$) shrinks, producing an exponential climb in the Curve Score metric!
                         </p>
                     </div>
-                    """,
-                    unsafe_allow_html=True,
+                    """
                 )
 
         # TAB 3: 4-Panel CV Diagnostics
@@ -774,7 +724,7 @@ def main() -> None:
         with tab_cert:
             st.markdown("### 📜 Official Certificate of Banana Curvature")
             cert_id = f"IBBC-{abs(hash(image_name)) % 1000000:06d}"
-            st.markdown(
+            st.html(
                 f"""
                 <div class="cert-container">
                     <div class="cert-seal">🍌</div>
@@ -800,8 +750,7 @@ def main() -> None:
                         Authorized by: <b>Professor Peel, Chief Fruit Geometer</b> • 100% Potassium Guaranteed
                     </div>
                 </div>
-                """,
-                unsafe_allow_html=True,
+                """
             )
 
             # JSON Certificate Download
