@@ -154,6 +154,7 @@ def create_annotated_overlay(
 def create_diagnostic_figure(
     image_rgb: np.ndarray,
     result: CurvatureAnalysisResult,
+    theme: str = "light",
 ) -> plt.Figure:
     """
     Generate a 4-panel diagnostic Matplotlib figure displaying:
@@ -162,20 +163,28 @@ def create_diagnostic_figure(
     3. Centerline & Chord Geometric Overlay
     4. Local Curvature Profile along path length
     """
-    fig = plt.figure(figsize=(12, 8), facecolor="#0f172a")
+    is_light = theme == "light"
+    fig_bg = "#ffffff" if is_light else "#0f172a"
+    text_color = "#0f172a" if is_light else "#ffffff"
+    sub_text_color = "#475569" if is_light else "#94a3b8"
+    chart_bg = "#f8fafc" if is_light else "#1e293b"
+    grid_color = "#e2e8f0" if is_light else "#475569"
+    spine_color = "#cbd5e1" if is_light else "#334155"
+
+    fig = plt.figure(figsize=(12, 8), facecolor=fig_bg)
     gs = gridspec.GridSpec(2, 2, figure=fig, wspace=0.25, hspace=0.3)
 
     # 1. Original
     ax1 = fig.add_subplot(gs[0, 0])
     ax1.imshow(image_rgb)
-    ax1.set_title("1. Input Image", color="white", fontsize=12, pad=8)
+    ax1.set_title("1. Input Image", color=text_color, fontsize=12, pad=8, fontweight="bold")
     ax1.axis("off")
 
     # 2. Binary Mask
     ax2 = fig.add_subplot(gs[0, 1])
     if result.binary_mask is not None:
-        ax2.imshow(result.binary_mask, cmap="magma")
-        ax2.set_title("2. Segmentation Mask", color="white", fontsize=12, pad=8)
+        ax2.imshow(result.binary_mask, cmap="viridis" if is_light else "magma")
+        ax2.set_title("2. Segmentation Mask", color=text_color, fontsize=12, pad=8, fontweight="bold")
     else:
         ax2.text(0.5, 0.5, "No Mask Available", color="gray", ha="center", va="center")
     ax2.axis("off")
@@ -185,34 +194,33 @@ def create_diagnostic_figure(
     annotated = create_annotated_overlay(image_rgb, result, show_info_card=False)
     ax3.imshow(annotated)
     badge = f"Curve Score: {result.curve_score:.1f}% ({result.category})"
-    ax3.set_title(f"3. Geometric Overlay\n{badge}", color="white", fontsize=11, pad=8)
+    ax3.set_title(f"3. Geometric Overlay\n{badge}", color=text_color, fontsize=11, pad=8, fontweight="bold")
     ax3.axis("off")
 
     # 4. Local Curvature or Metrics Chart
     ax4 = fig.add_subplot(gs[1, 1])
-    ax4.set_facecolor("#1e293b")
+    ax4.set_facecolor(chart_bg)
 
     if result.success and result.local_curvatures is not None and len(result.local_curvatures) > 0:
         norm_length = np.linspace(0, 100, len(result.local_curvatures))
-        ax4.plot(norm_length, result.local_curvatures * 1000, color="#38bdf8", linewidth=2.0, label="Curvature (10⁻³ px⁻¹)")
-        ax4.fill_between(norm_length, result.local_curvatures * 1000, color="#38bdf8", alpha=0.2)
-        ax4.set_xlabel("Normalized Centerline Path (%)", color="#94a3b8", fontsize=10)
-        ax4.set_ylabel("Curvature κ (x10⁻³)", color="#94a3b8", fontsize=10)
-        ax4.set_title("4. Centerline Curvature Profile", color="white", fontsize=12, pad=8)
-        ax4.tick_params(colors="#94a3b8", labelsize=8)
+        ax4.plot(norm_length, result.local_curvatures * 1000, color="#0284c7", linewidth=2.5, label="Curvature (10⁻³ px⁻¹)")
+        ax4.fill_between(norm_length, result.local_curvatures * 1000, color="#38bdf8", alpha=0.25)
+        ax4.set_xlabel("Normalized Centerline Path (%)", color=sub_text_color, fontsize=10, fontweight="bold")
+        ax4.set_ylabel("Curvature κ (x10⁻³)", color=sub_text_color, fontsize=10, fontweight="bold")
+        ax4.set_title("4. Centerline Curvature Profile", color=text_color, fontsize=12, pad=8, fontweight="bold")
+        ax4.tick_params(colors=sub_text_color, labelsize=8)
         for spine in ax4.spines.values():
-            spine.set_color("#334155")
-        ax4.grid(True, linestyle="--", alpha=0.3, color="#475569")
+            spine.set_color(spine_color)
+        ax4.grid(True, linestyle="--", alpha=0.6, color=grid_color)
     else:
-        # Bar chart comparing Chord vs Arc Length
         metrics = ["Chord Distance", "Arc Length"]
         values = [result.chord_distance, result.path_length]
-        bars = ax4.bar(metrics, values, color=["#f59e0b", "#06b6d4"], width=0.45)
-        ax4.set_ylabel("Length (pixels)", color="#94a3b8", fontsize=10)
-        ax4.set_title("4. Length Comparison", color="white", fontsize=12, pad=8)
-        ax4.tick_params(colors="#94a3b8", labelsize=9)
+        bars = ax4.bar(metrics, values, color=["#f59e0b", "#0284c7"], width=0.45)
+        ax4.set_ylabel("Length (pixels)", color=sub_text_color, fontsize=10, fontweight="bold")
+        ax4.set_title("4. Length Comparison", color=text_color, fontsize=12, pad=8, fontweight="bold")
+        ax4.tick_params(colors=sub_text_color, labelsize=9)
         for spine in ax4.spines.values():
-            spine.set_color("#334155")
+            spine.set_color(spine_color)
         for bar in bars:
             height = bar.get_height()
             ax4.annotate(
@@ -222,8 +230,9 @@ def create_diagnostic_figure(
                 textcoords="offset points",
                 ha="center",
                 va="bottom",
-                color="white",
+                color=text_color,
                 fontsize=9,
+                fontweight="bold",
             )
 
     plt.tight_layout()

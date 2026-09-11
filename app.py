@@ -1,7 +1,7 @@
 """
-🍌 Banana Curve Analyzer - UI/UX Pro Max Edition
-A world-class, accessible, and playful computer vision laboratory for banana geometry analysis.
-Designed using UI/UX Pro Max principles: Bento Grid, accessible WCAG contrast, Outfit typography,
+🍌 Banan-AI Curve Analyzer - Futuristic Light-Mode AI Laboratory
+A state-of-the-art, ultra-modern computer vision laboratory for banana geometry analysis.
+Built with clean porcelain white canvas, Apple/Linear aesthetic, high-contrast typography,
 dynamic reactive SVG mascot, interactive curvature sandbox, and downloadable IBBC certification.
 """
 
@@ -33,14 +33,14 @@ from src.visualization import create_annotated_overlay, create_diagnostic_figure
 # Streamlit Application Configuration
 # -----------------------------------------------------------------------------
 st.set_page_config(
-    page_title="Banana Curve Analyzer 🍌",
+    page_title="Banan-AI Vision Lab 🍌",
     page_icon="🍌",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
 # -----------------------------------------------------------------------------
-# UI/UX Pro Max Design System & Global Styles
+# Futuristic Light-Mode AI Design System & Styling
 # -----------------------------------------------------------------------------
 st.html(
     """
@@ -51,29 +51,41 @@ st.html(
         --font-display: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
         --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
         
-        --bg-canvas: #090d16;
-        --bg-card: rgba(17, 24, 39, 0.75);
-        --border-subtle: rgba(255, 255, 255, 0.08);
-        --border-hover: rgba(245, 158, 11, 0.5);
+        --bg-canvas: #ffffff;
+        --bg-subtle: #f8fafc;
+        --bg-card: #ffffff;
+        --border-subtle: #e2e8f0;
+        --border-hover: #f59e0b;
         
-        --brand-gold: #facc15;
-        --brand-amber: #f59e0b;
+        --brand-gold: #eab308;
+        --brand-amber: #d97706;
         --brand-orange: #ea580c;
-        --tech-cyan: #38bdf8;
-        --tech-violet: #a855f7;
+        --tech-cyan: #0284c7;
         
-        --text-primary: #f8fafc;
-        --text-secondary: #94a3b8;
+        --text-primary: #0f172a;
+        --text-secondary: #475569;
         --text-muted: #64748b;
     }
 
-    html, body, [class*="css"] {
-        font-family: var(--font-body);
-        color: var(--text-primary);
+    /* Global Light Background */
+    .stApp {
+        background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%) !important;
+        color: var(--text-primary) !important;
+        font-family: var(--font-body) !important;
     }
 
-    h1, h2, h3, h4, h5, h6, .display-font {
-        font-family: var(--font-display);
+    /* Sidebar Light Styling */
+    [data-testid="stSidebar"] {
+        background: #f8fafc !important;
+        border-right: 1px solid #e2e8f0 !important;
+    }
+    [data-testid="stSidebar"] * {
+        color: #1e293b !important;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        font-family: var(--font-display) !important;
+        color: var(--text-primary) !important;
     }
 
     /* Top Navigation Header */
@@ -81,7 +93,7 @@ st.html(
         display: flex;
         align-items: center;
         gap: 14px;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.3rem;
     }
 
     .brand-title {
@@ -89,7 +101,7 @@ st.html(
         font-size: 2.6rem;
         font-weight: 900;
         letter-spacing: -0.8px;
-        background: linear-gradient(135deg, #fef08a 0%, #facc15 35%, #f59e0b 70%, #ea580c 100%);
+        background: linear-gradient(135deg, #ca8a04 0%, #eab308 30%, #ea580c 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         margin: 0;
@@ -107,64 +119,63 @@ st.html(
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        background: rgba(56, 189, 248, 0.12);
-        color: var(--tech-cyan);
-        border: 1px solid rgba(56, 189, 248, 0.3);
+        background: #f0fdf4;
+        color: #16a34a;
+        border: 1px solid #86efac;
         border-radius: 9999px;
         padding: 5px 16px;
         font-size: 0.8rem;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.8px;
+        box-shadow: 0 2px 6px rgba(22, 163, 74, 0.08);
     }
 
     .status-dot {
         width: 8px;
         height: 8px;
-        background-color: var(--tech-cyan);
+        background-color: #16a34a;
         border-radius: 50%;
-        box-shadow: 0 0 8px var(--tech-cyan);
+        box-shadow: 0 0 6px #22c55e;
     }
 
-    /* Bento Grid Card Architecture */
+    /* Modern Elevated White Bento Card Architecture */
     .bento-card {
-        background: var(--bg-card);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        border: 1px solid var(--border-subtle);
-        border-radius: 18px;
-        padding: 20px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-        transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s ease, box-shadow 0.2s ease;
-        margin-bottom: 10px;
+        background: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 18px !important;
+        padding: 22px !important;
+        box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.02) !important;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        margin-bottom: 10px !important;
     }
 
     .bento-card:hover {
-        transform: translateY(-3px);
-        border-color: var(--border-hover);
-        box-shadow: 0 14px 35px rgba(245, 158, 11, 0.12);
+        transform: translateY(-3px) !important;
+        box-shadow: 0 12px 28px -4px rgba(245, 158, 11, 0.15), 0 4px 10px -2px rgba(0, 0, 0, 0.04) !important;
+        border-color: #facc15 !important;
     }
 
     .kpi-val {
         font-family: var(--font-display);
-        font-size: 2.4rem;
+        font-size: 2.5rem;
         font-weight: 900;
         line-height: 1.1;
         letter-spacing: -0.5px;
-        color: #ffffff;
+        color: #0f172a;
     }
 
     .kpi-unit {
         font-size: 1rem;
         font-weight: 600;
-        color: var(--text-secondary);
+        color: var(--text-muted);
         margin-left: 2px;
     }
 
     .kpi-lbl {
-        font-size: 0.82rem;
+        font-size: 0.8rem;
         font-weight: 700;
-        color: var(--text-secondary);
+        color: var(--text-muted);
         text-transform: uppercase;
         letter-spacing: 0.08em;
         margin-top: 6px;
@@ -172,115 +183,115 @@ st.html(
 
     /* Curvature Category Badges */
     .badge-straight {
-        background: rgba(34, 197, 94, 0.15);
-        color: #4ade80;
-        border: 1px solid #22c55e;
-        padding: 6px 18px;
-        border-radius: 9999px;
-        font-weight: 800;
-        font-size: 1.05rem;
-        display: inline-block;
-        letter-spacing: 0.02em;
+        background: #ecfdf5 !important;
+        color: #15803d !important;
+        border: 1.5px solid #86efac !important;
+        padding: 6px 18px !important;
+        border-radius: 9999px !important;
+        font-weight: 800 !important;
+        font-size: 1.05rem !important;
+        display: inline-block !important;
+        letter-spacing: 0.02em !important;
     }
 
     .badge-curved {
-        background: rgba(245, 158, 11, 0.15);
-        color: #fbbf24;
-        border: 1px solid #f59e0b;
-        padding: 6px 18px;
-        border-radius: 9999px;
-        font-weight: 800;
-        font-size: 1.05rem;
-        display: inline-block;
-        letter-spacing: 0.02em;
+        background: #fffbeb !important;
+        color: #b45309 !important;
+        border: 1.5px solid #fde68a !important;
+        padding: 6px 18px !important;
+        border-radius: 9999px !important;
+        font-weight: 800 !important;
+        font-size: 1.05rem !important;
+        display: inline-block !important;
+        letter-spacing: 0.02em !important;
     }
 
     .badge-highly-curved {
-        background: rgba(239, 68, 68, 0.15);
-        color: #f87171;
-        border: 1px solid #ef4444;
-        padding: 6px 18px;
-        border-radius: 9999px;
-        font-weight: 800;
-        font-size: 1.05rem;
-        display: inline-block;
-        letter-spacing: 0.02em;
+        background: #fef2f2 !important;
+        color: #b91c1c !important;
+        border: 1.5px solid #fca5a5 !important;
+        padding: 6px 18px !important;
+        border-radius: 9999px !important;
+        font-weight: 800 !important;
+        font-size: 1.05rem !important;
+        display: inline-block !important;
+        letter-spacing: 0.02em !important;
     }
 
-    /* Mascot Stage */
+    /* Mascot Stage (Light Mode with Warm Ambient Illumination) */
     .mascot-stage {
-        background: radial-gradient(ellipse at center, rgba(245, 158, 11, 0.12) 0%, rgba(15, 23, 42, 0.85) 75%);
-        border: 1px solid rgba(245, 158, 11, 0.25);
-        border-radius: 24px;
-        padding: 24px;
-        text-align: center;
-        margin-bottom: 24px;
-        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+        background: linear-gradient(135deg, #fffbeb 0%, #ffffff 60%, #f0f9ff 100%) !important;
+        border: 1.5px solid #fef08a !important;
+        border-radius: 24px !important;
+        padding: 26px !important;
+        text-align: center !important;
+        margin-bottom: 24px !important;
+        box-shadow: 0 10px 30px -5px rgba(245, 158, 11, 0.12) !important;
     }
 
     .speech-bubble {
-        display: inline-block;
-        background: #1e293b;
-        border: 2px solid var(--brand-amber);
-        border-radius: 18px;
-        padding: 14px 22px;
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: var(--text-primary);
-        margin-bottom: 16px;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-        max-width: 85%;
-        line-height: 1.45;
+        display: inline-block !important;
+        background: #ffffff !important;
+        border: 2px solid #f59e0b !important;
+        border-radius: 18px !important;
+        padding: 14px 24px !important;
+        font-size: 1.1rem !important;
+        font-weight: 600 !important;
+        color: #1e293b !important;
+        margin-bottom: 16px !important;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06) !important;
+        max-width: 85% !important;
+        line-height: 1.5 !important;
     }
 
     .mascot-title {
-        font-family: var(--font-display);
-        font-size: 1.5rem;
-        font-weight: 900;
-        color: var(--brand-gold);
-        margin-top: 12px;
-        letter-spacing: -0.3px;
+        font-family: var(--font-display) !important;
+        font-size: 1.55rem !important;
+        font-weight: 900 !important;
+        color: #b45309 !important;
+        margin-top: 12px !important;
+        letter-spacing: -0.3px !important;
     }
 
     .mascot-subtitle {
-        font-size: 1rem;
-        color: var(--text-secondary);
-        font-weight: 500;
+        font-size: 1rem !important;
+        color: #64748b !important;
+        font-weight: 500 !important;
     }
 
-    /* Pitch Card */
+    /* Pitch Card in Light Mode */
     .pitch-banner {
-        background: linear-gradient(135deg, rgba(14, 116, 144, 0.25) 0%, rgba(15, 23, 42, 0.95) 100%);
-        border: 2px solid var(--tech-cyan);
-        border-radius: 18px;
-        padding: 22px;
-        margin-bottom: 24px;
-        box-shadow: 0 12px 30px rgba(56, 189, 248, 0.18);
+        background: linear-gradient(135deg, #f0f9ff 0%, #ffffff 100%) !important;
+        border: 2px solid #0284c7 !important;
+        border-radius: 18px !important;
+        padding: 22px !important;
+        margin-bottom: 24px !important;
+        box-shadow: 0 10px 25px -5px rgba(2, 132, 199, 0.1) !important;
     }
 
     .pitch-header {
-        font-family: var(--font-display);
-        font-size: 1.25rem;
-        font-weight: 800;
-        color: var(--tech-cyan);
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 8px;
+        font-family: var(--font-display) !important;
+        font-size: 1.25rem !important;
+        font-weight: 800 !important;
+        color: #0284c7 !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        margin-bottom: 8px !important;
     }
 
-    /* Certificate Box */
+    /* Certificate Box (Clean Ivory Diplomatic Charter) */
     .cert-container {
-        background: #0f172a;
-        border: 3px double var(--brand-amber);
-        border-radius: 20px;
-        padding: 32px;
-        text-align: center;
-        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+        background: #ffffff !important;
+        border: 3px double #d97706 !important;
+        border-radius: 20px !important;
+        padding: 36px !important;
+        text-align: center !important;
+        box-shadow: 0 12px 35px -5px rgba(217, 119, 6, 0.15) !important;
     }
 
     .cert-seal {
-        font-size: 2.8rem;
+        font-size: 3rem;
         margin-bottom: 10px;
     }
     </style>
@@ -340,8 +351,8 @@ def render_svg_mascot(curve_score: float) -> str:
         <circle cx="95" cy="133" r="5" fill="#1e293b" />
         <circle cx="125" cy="133" r="5" fill="#1e293b" />
         <line x1="95" y1="155" x2="125" y2="155" stroke="#451a03" stroke-width="4" stroke-linecap="round" />
-        <circle cx="125" cy="133" r="12" stroke="#f59e0b" stroke-width="3" fill="rgba(245, 158, 11, 0.18)" />
-        <path d="M 137 135 Q 145 155 130 170" stroke="#f59e0b" stroke-width="2" fill="none" />
+        <circle cx="125" cy="133" r="12" stroke="#d97706" stroke-width="3" fill="rgba(245, 158, 11, 0.2)" />
+        <path d="M 137 135 Q 145 155 130 170" stroke="#d97706" stroke-width="2" fill="none" />
         """
     elif profile["mood"] == "curved":
         face_svg = """
@@ -364,7 +375,7 @@ def render_svg_mascot(curve_score: float) -> str:
         <path d="M 115 116 Q 125 106 135 116" stroke="#451a03" stroke-width="3" fill="none" stroke-linecap="round" />
         <ellipse cx="110" cy="155" rx="14" ry="12" fill="#7f1d1d" stroke="#451a03" stroke-width="3" />
         <ellipse cx="110" cy="160" rx="9" ry="6" fill="#f43f5e" />
-        <path d="M 148 112 Q 154 107 156 115 Q 156 122 148 119 Z" fill="#38bdf8" />
+        <path d="M 148 112 Q 154 107 156 115 Q 156 122 148 119 Z" fill="#0284c7" />
         """
 
     ctrl_x = 110 + bend_factor
@@ -378,11 +389,11 @@ def render_svg_mascot(curve_score: float) -> str:
 <stop offset="100%" stop-color="#eab308" />
 </linearGradient>
 <filter id="bananaGlow" x="-20%" y="-20%" width="140%" height="140%">
-<feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#f59e0b" flood-opacity="0.4" />
+<feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#f59e0b" flood-opacity="0.35" />
 </filter>
 </defs>
 <path d="M 110 35 Q {ctrl_x} 140 105 245 Q {back_ctrl_x} 140 100 35 Z" fill="url(#bananaGradient)" stroke="#b45309" stroke-width="4" filter="url(#bananaGlow)" stroke-linejoin="round" />
-<path d="M 106 42 Q {ctrl_x - 12} 140 103 235" stroke="#fef9c3" stroke-width="3.5" fill="none" stroke-linecap="round" opacity="0.85" />
+<path d="M 106 42 Q {ctrl_x - 12} 140 103 235" stroke="#fef9c3" stroke-width="3.5" fill="none" stroke-linecap="round" opacity="0.9" />
 <path d="M 100 35 L 110 35 L 113 18 L 97 18 Z" fill="#65a30d" stroke="#365314" stroke-width="3" />
 <ellipse cx="105" cy="18" rx="8" ry="3.5" fill="#365314" />
 <ellipse cx="105" cy="245" rx="5.5" ry="4" fill="#713f12" />
@@ -408,8 +419,8 @@ def main() -> None:
             <div class="brand-logo">
                 <span style="font-size: 2.8rem; line-height: 1;">🍌</span>
                 <div>
-                    <div class="brand-title">Banana Curve Analyzer</div>
-                    <div class="brand-subtitle">Computer vision laboratory & geometric curvature intelligence</div>
+                    <div class="brand-title">Banan-AI Vision Lab</div>
+                    <div class="brand-subtitle">Automated subpixel fruit geometry & neural curvature grading</div>
                 </div>
             </div>
             """
@@ -420,13 +431,13 @@ def main() -> None:
         st.html(
             """
             <div class="status-pill" style="margin-top: 6px;">
-                <div class="status-dot"></div> CV Engine v2.0 • Online
+                <div class="status-dot"></div> AI Vision Engine v2.4 • Active
             </div>
             """
         )
         st.markdown('</div>', unsafe_allow_html=True)
 
-    st.html("<hr style='border: 0; border-top: 1px solid rgba(255,255,255,0.08); margin: 0.8rem 0 1.5rem 0;'>")
+    st.html("<hr style='border: 0; border-top: 1px solid #e2e8f0; margin: 0.8rem 0 1.5rem 0;'>")
 
     # 2. Hackathon Pitch Mode Banner
     if pitch_toggle:
@@ -436,10 +447,10 @@ def main() -> None:
                 <div class="pitch-header">
                     <span>⚡</span> 30-Second Hackathon Elevator Pitch
                 </div>
-                <div style="font-size: 0.98rem; color: #cbd5e1; line-height: 1.65;">
-                    <b>The Real-World Problem:</b> In global agricultural export chains, fruit that deviates from crate packaging curvature thresholds gets bruised, causing billions in annual produce waste.<br>
-                    <b>Our CV Solution:</b> We built an automated pipeline combining <b>Dual-Space Saliency (CIE LAB + HSV)</b> to eradicate wood-table color bleeding, <b>Medial Axis Skeletonization</b> with graph-geodesic spur pruning, and continuous <b>Parametric B-Splines</b> that solve discrete raster step inflation.<br>
-                    <b>Impact:</b> Real-time, subpixel automated grading of fruit curvature into standardized industrial categories.
+                <div style="font-size: 0.98rem; color: #334155; line-height: 1.65;">
+                    <b>The Real-World Problem:</b> In global agricultural export packaging, bananas deviating from crate-curvature thresholds become bruised in transit, resulting in billions in avoidable food waste.<br>
+                    <b>Our CV Solution:</b> We engineered an intelligent pipeline combining <b>Dual-Space Saliency (CIE LAB + HSV)</b> to defeat table-color bleeding, <b>Medial Axis Skeletonization</b> with graph-geodesic spur pruning, and continuous <b>Parametric B-Splines</b> that eradicate raster step inflation.<br>
+                    <b>Commercial Outcome:</b> Real-time, subpixel automated grading of fruit curvature into standardized industrial packaging categories.
                 </div>
             </div>
             """
@@ -448,7 +459,7 @@ def main() -> None:
     # 3. Sidebar Configuration Station
     st.sidebar.markdown(
         """
-        <div style="font-size: 1.3rem; font-weight: 800; color: #facc15; margin-bottom: 8px;">
+        <div style="font-size: 1.3rem; font-weight: 800; color: #0f172a; margin-bottom: 8px;">
             🎛️ Control Station
         </div>
         """,
@@ -540,7 +551,7 @@ def main() -> None:
 
     # 4. Processing & Analysis Execution
     if selected_image is not None:
-        with st.spinner("🍌 Professor Peel is calculating curvature tensor splines..."):
+        with st.spinner("🍌 Banan-AI is evaluating curvature tensor splines..."):
             result = analyze_banana(
                 selected_image,
                 segmentation_method=seg_method,
@@ -566,7 +577,7 @@ def main() -> None:
 
         personality = get_personality_profile(result.curve_score)
 
-        # 5. Dynamic Mascot Reaction Stage
+        # 5. Dynamic Mascot Reaction Stage (Light Mode)
         st.html(
             f"""
             <div class="mascot-stage">
@@ -580,13 +591,13 @@ def main() -> None:
             """
         )
 
-        # 6. Primary KPI Bento Grid
+        # 6. Primary KPI Bento Grid (Crisp White Light Mode)
         kpi_col1, kpi_col2, kpi_col3, kpi_col4, kpi_col5 = st.columns(5)
         with kpi_col1:
             st.html(
                 f"""
                 <div class="bento-card" style="text-align: center;">
-                    <div class="kpi-val" style="color: #facc15;">{result.curve_score:.2f}%</div>
+                    <div class="kpi-val" style="color: #ca8a04;">{result.curve_score:.2f}%</div>
                     <div class="kpi-lbl">Curve Score</div>
                 </div>
                 """
@@ -678,7 +689,7 @@ def main() -> None:
             with col_img_b:
                 st.image(annotated_img, caption="Detected Geometric Overlay", use_container_width=True)
 
-            with st.expander("👁️ View Isolated Binary Mask (Black = Background, White = Banana)", expanded=False):
+            with st.expander("👁️ View Isolated Binary Mask (White = Banana, Black = Background)", expanded=False):
                 if result.binary_mask is not None:
                     st.image(result.binary_mask, use_container_width=True)
 
@@ -698,16 +709,16 @@ def main() -> None:
                 st.html(
                     f"""
                     <div class="bento-card">
-                        <div style="font-size: 1.3rem; font-weight: 800; color: #facc15; margin-bottom: 8px;">
+                        <div style="font-size: 1.3rem; font-weight: 800; color: #ca8a04; margin-bottom: 8px;">
                             Simulation Diagnostics
                         </div>
-                        <p style="margin: 6px 0;"><b>Simulated Score:</b> <span style="font-size: 1.6rem; color: #38bdf8; font-weight: 900;">{sim_score:.1f}%</span></p>
-                        <p style="margin: 6px 0;"><b>Archetype:</b> <span style="color: #4ade80; font-weight: 700;">{sim_data['personality']}</span></p>
+                        <p style="margin: 6px 0;"><b>Simulated Score:</b> <span style="font-size: 1.6rem; color: #0284c7; font-weight: 900;">{sim_score:.1f}%</span></p>
+                        <p style="margin: 6px 0;"><b>Archetype:</b> <span style="color: #15803d; font-weight: 700;">{sim_data['personality']}</span></p>
                         <p style="margin: 6px 0;"><b>Aerodynamics:</b> {sim_data['aerodynamic']}</p>
                         <p style="margin: 6px 0;"><b>Peelability Rating:</b> {sim_data['peelability']}</p>
                         <p style="margin: 6px 0;"><b>Mario Kart Hazard:</b> {sim_data['mario_kart']}</p>
-                        <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 12px 0;">
-                        <p style="font-size: 0.88rem; color: #94a3b8; line-height: 1.5;">
+                        <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 12px 0;">
+                        <p style="font-size: 0.88rem; color: #64748b; line-height: 1.5;">
                             <b>Mathematical Principle:</b> As curvature increases, the perimeter arc distance ($L$) grows while the straight-line chord ($D$) shrinks, producing an exponential climb in the Curve Score metric!
                         </p>
                     </div>
@@ -717,7 +728,7 @@ def main() -> None:
         # TAB 3: 4-Panel CV Diagnostics
         with tab_cv:
             st.markdown("### 🔬 4-Panel Computer Vision Pipeline Inspection")
-            diag_figure = create_diagnostic_figure(selected_image, result)
+            diag_figure = create_diagnostic_figure(selected_image, result, theme="light")
             st.pyplot(diag_figure)
 
         # TAB 4: Official IBBC Certificate
@@ -728,25 +739,25 @@ def main() -> None:
                 f"""
                 <div class="cert-container">
                     <div class="cert-seal">🍌</div>
-                    <div style="font-family: var(--font-display); font-size: 2rem; font-weight: 900; color: #f59e0b; letter-spacing: 1px;">
+                    <div style="font-family: var(--font-display); font-size: 2rem; font-weight: 900; color: #d97706; letter-spacing: 1px;">
                         INTERNATIONAL BUREAU OF BANANA CURVATURE
                     </div>
-                    <div style="font-size: 0.95rem; color: #94a3b8; margin-bottom: 18px; letter-spacing: 0.05em;">
+                    <div style="font-size: 0.95rem; color: #64748b; margin-bottom: 18px; letter-spacing: 0.05em;">
                         OFFICIAL GLOBAL CERTIFICATE OF GEOMETRIC VERIFICATION
                     </div>
-                    <p style="font-size: 1.1rem; color: #f8fafc; max-width: 650px; margin: 0 auto;">
+                    <p style="font-size: 1.1rem; color: #1e293b; max-width: 650px; margin: 0 auto;">
                         This document certifies that specimen <b>{image_name}</b> (Serial: <code>{cert_id}</code>)<br>
                         has undergone automated subpixel computer vision analysis and is officially verified as:
                     </p>
-                    <div style="font-family: var(--font-display); font-size: 2.4rem; font-weight: 900; color: #38bdf8; margin: 18px 0;">
+                    <div style="font-family: var(--font-display); font-size: 2.4rem; font-weight: 900; color: #0284c7; margin: 18px 0;">
                         {result.category.upper()} (SCORE: {result.curve_score:.2f}%)
                     </div>
-                    <div style="display: flex; justify-content: space-around; max-width: 600px; margin: 20px auto; font-size: 0.95rem; color: #cbd5e1;">
+                    <div style="display: flex; justify-content: space-around; max-width: 600px; margin: 20px auto; font-size: 0.95rem; color: #334155;">
                         <div>📏 <b>Arc Length:</b> {result.path_length:.1f} px</div>
                         <div>📐 <b>Chord Distance:</b> {result.chord_distance:.1f} px</div>
                         <div>🎯 <b>Max Deflection:</b> {result.max_deflection:.1f} px</div>
                     </div>
-                    <div style="margin-top: 30px; font-size: 0.82rem; color: #64748b;">
+                    <div style="margin-top: 30px; font-size: 0.85rem; color: #64748b;">
                         Authorized by: <b>Professor Peel, Chief Fruit Geometer</b> • 100% Potassium Guaranteed
                     </div>
                 </div>
