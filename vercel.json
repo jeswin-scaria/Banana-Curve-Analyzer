@@ -1,11 +1,8 @@
 {
   "version": 2,
   "framework": null,
-  "cleanUrls": true,
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
-    }
-  ]
+  "buildCommand": "echo 'Static frontend ready'",
+  "installCommand": "echo 'No install step required'",
+  "outputDirectory": ".",
+  "cleanUrls": true
 }
