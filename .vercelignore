@@ -1,0 +1,15 @@
+# Ignore all Python backend files on Vercel so Vercel only deploys the static frontend
+*.py
+requirements.txt
+src/
+tests/
+benchmarks/
+samples/
+scripts/
+backend_context/
+BACKEND_AUDIT.md
+__pycache__/
+.claude/
+.streamlit/
+.venv/
+venv/
