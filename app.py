@@ -1241,6 +1241,82 @@ st.html(
             align-items: center;
             gap: 1.5rem;
         }
+
+        /* The certificate ledger is a 4-column table (key, value, key, value).
+           At phone width that needs ~476px inside a ~295px frame, so the right
+           half of every row was being cut off. Re-flow each row as a 2-column
+           grid: the four cells wrap into two key/value pairs, one per line. */
+        .cert-ledger-table,
+        .cert-ledger-table tbody {
+            display: block;
+            width: 100%;
+        }
+        .cert-ledger-table tr {
+            display: grid;
+            grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+        }
+        .cert-ledger-table td {
+            display: block;
+            min-width: 0;
+            padding: 0.5rem 0.6rem;
+            font-size: 0.72rem;
+            overflow-wrap: anywhere;
+        }
+
+        /* Oversized display type, scaled for a narrow column */
+        .brand-title { font-size: 1.55rem; }
+        .brand-mark { font-size: 2.4rem; }
+        .ingestion-title { font-size: 1.25rem; }
+        .score-giant-number { font-size: 3rem; }
+        .score-giant-percent { font-size: 1.5rem; }
+        .cert-solemn-heading { font-size: 1.6rem; }
+        .cert-main-bureau-title { font-size: 1.02rem; }
+        .cert-script-sign { font-size: 1.6rem; }
+
+        /* Fixed-width certificate furniture must not exceed the screen */
+        .cert-signature-box { width: 100%; max-width: 250px; }
+        .cert-filigree-line { max-width: 40vw; }
+
+        /* A nowrap callout has nowhere to go on a narrow screen */
+        .scale-indicator-callout { white-space: normal; }
+
+        /* Reclaim horizontal space Streamlit reserves for desktop gutters */
+        .main .block-container {
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+        }
+
+        img { max-width: 100%; height: auto; }
+    }
+
+    /* === Tablet / small laptop: two columns instead of three === */
+    @media (min-width: 769px) and (max-width: 1024px) {
+        .main .block-container {
+            padding-left: 1.25rem !important;
+            padding-right: 1.25rem !important;
+        }
+        .measurements-grid { grid-template-columns: repeat(2, 1fr); }
+        .pipeline-grid { grid-template-columns: repeat(2, 1fr); }
+        .brand-title { font-size: 1.95rem; }
+        .score-giant-number { font-size: 3.5rem; }
+        .cert-solemn-heading { font-size: 1.95rem; }
+        .cert-ledger-table td { font-size: 0.76rem; padding: 0.6rem 0.7rem; }
+    }
+
+    /* === Small phones === */
+    @media (max-width: 420px) {
+        .brand-title { font-size: 1.32rem; }
+        .score-giant-number { font-size: 2.5rem; }
+        .score-giant-percent { font-size: 1.25rem; }
+        .cert-solemn-heading { font-size: 1.32rem; }
+        .cert-main-bureau-title { font-size: 0.9rem; }
+        .cert-script-sign { font-size: 1.35rem; }
+        .cert-ledger-table td { font-size: 0.66rem; padding: 0.42rem 0.45rem; }
+        .cert-official-frame { padding: 1rem 0.6rem; }
+        .main .block-container {
+            padding-left: 0.75rem !important;
+            padding-right: 0.75rem !important;
+        }
     }
     </style>
     """
@@ -1301,7 +1377,7 @@ def main() -> None:
         st.session_state["selected_sample"] = None
 
     with sample_col0:
-        if st.button("🍌 Model Specimen (മോഡൽ)", use_container_width=True):
+        if st.button("🍌 Real Specimen (മോഡൽ പഴം)", use_container_width=True):
             st.session_state["selected_sample"] = "samples/model_banana.png"
     with sample_col1:
         if st.button("📏 Straight (നേർരേഖ)", use_container_width=True):
