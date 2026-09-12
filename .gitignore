@@ -47,8 +47,8 @@ htmlcov/
 Thumbs.db
 ehthumbs.db
 
-# Streamlit
-.streamlit/
+# Streamlit secrets only
+.streamlit/secrets.toml
 
 # Claude
 .claude/

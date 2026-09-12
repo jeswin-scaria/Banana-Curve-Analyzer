@@ -2,219 +2,151 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🍌 CHILL ETHAKAAA — Precision Banana Geometry Lab</title>
-  <meta name="description" content="State-of-the-art computer vision instrument for calculating geometric banana curvature, path length, chord distance, and osculating circle radius.">
-  
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-  
-  <link rel="stylesheet" href="index.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>CHILL ETHAKAAA | Banana Geometry Lab</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍌</text></svg>">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #F8F5EC;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    #appFrame {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      border: none;
+      z-index: 10;
+      background-color: #F8F5EC;
+      transition: opacity 0.5s ease;
+    }
+    #loaderOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: linear-gradient(135deg, #F8F5EC 0%, #EDE8DC 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+      transition: opacity 0.6s ease, visibility 0.6s ease;
+    }
+    #loaderOverlay.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .banana-pulse {
+      font-size: 64px;
+      animation: bounce-pulse 1.6s infinite ease-in-out;
+      margin-bottom: 20px;
+    }
+    .loader-title {
+      font-size: 24px;
+      font-weight: 800;
+      color: #171717;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+    .loader-sub {
+      font-size: 14px;
+      font-weight: 500;
+      color: #5A5954;
+      margin-bottom: 24px;
+      letter-spacing: 0.05em;
+    }
+    .loader-bar-bg {
+      width: 260px;
+      height: 6px;
+      background: rgba(0, 0, 0, 0.08);
+      border-radius: 999px;
+      overflow: hidden;
+      position: relative;
+    }
+    .loader-bar-fill {
+      width: 40%;
+      height: 100%;
+      background: linear-gradient(90deg, #F4B400, #EAB308);
+      border-radius: 999px;
+      animation: indeterminate 1.8s infinite ease-in-out;
+    }
+    .wake-hint {
+      margin-top: 18px;
+      font-size: 12px;
+      color: #8E8D86;
+    }
+    @keyframes bounce-pulse {
+      0%, 100% { transform: scale(1) translateY(0); }
+      50% { transform: scale(1.1) translateY(-8px); }
+    }
+    @keyframes indeterminate {
+      0% { transform: translateX(-100%); width: 30%; }
+      50% { transform: translateX(100%); width: 60%; }
+      100% { transform: translateX(300%); width: 30%; }
+    }
+  </style>
 </head>
 <body>
-  <!-- Ambient background glow elements -->
-  <div class="glow glow-top"></div>
-  <div class="glow glow-bottom"></div>
-
-  <div class="app-container">
-    <!-- Navigation Header -->
-    <header class="app-header">
-      <div class="logo-group">
-        <div class="logo-badge">🍌</div>
-        <div>
-          <h1 class="brand-title">CHILL ETHAKAAA</h1>
-          <p class="brand-subtitle">BANANA GEOMETRY LAB • PRECISION CURVATURE INSTRUMENT</p>
-        </div>
-      </div>
-      
-      <div class="header-actions">
-        <!-- Render Backend Connection Status Pill -->
-        <div class="backend-status-pill" id="backendStatusPill" title="Status of Render backend server">
-          <span class="status-dot pulse" id="statusDot"></span>
-          <span class="status-text" id="statusText">Checking Render...</span>
-        </div>
-
-        <button class="btn-icon" id="settingsBtn" title="Backend API Settings">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-        </button>
-      </div>
-    </header>
-
-    <!-- Settings Modal Drawer -->
-    <div class="settings-modal" id="settingsModal">
-      <div class="settings-content">
-        <h3>Backend API Configuration</h3>
-        <p class="settings-help">Points to your deployed Python CV engine on Render.</p>
-        <label for="apiUrlInput">Render Backend URL:</label>
-        <div class="input-group">
-          <input type="text" id="apiUrlInput" value="https://banana-curve-analyzer.onrender.com" placeholder="https://banana-curve-analyzer.onrender.com">
-          <button id="saveApiBtn" class="btn-primary">Save & Connect</button>
-        </div>
-        <button id="closeSettingsBtn" class="btn-secondary">Close</button>
-      </div>
+  <!-- Seamless Loading Screen -->
+  <div id="loaderOverlay">
+    <div class="banana-pulse">🍌</div>
+    <div class="loader-title">CHILL ETHAKAAA</div>
+    <div class="loader-sub">BANANA GEOMETRY LAB • INITIALIZING</div>
+    <div class="loader-bar-bg">
+      <div class="loader-bar-fill"></div>
     </div>
-
-    <main class="main-layout">
-      <!-- Left Column: Input & Controls -->
-      <section class="control-panel">
-        <!-- Drag & Drop Upload Zone -->
-        <div class="card upload-card" id="dropZone">
-          <input type="file" id="fileInput" accept="image/*" class="file-input-hidden">
-          <div class="upload-inner">
-            <div class="upload-icon-wrapper">
-              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-            </div>
-            <h2 class="upload-title">Drop Banana Photo Here</h2>
-            <p class="upload-sub">or <span class="upload-browse">browse files</span> from device</p>
-            <div class="upload-badges">
-              <span>JPG</span><span>PNG</span><span>WEBP</span><span>Full End-to-End CV</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Sample Banana Preset Gallery -->
-        <div class="card preset-card">
-          <h3 class="section-title">Test Specimen Presets</h3>
-          <p class="section-sub">Try pre-calibrated laboratory test subjects:</p>
-          <div class="preset-grid">
-            <button class="preset-btn active" data-preset="curved">
-              <span class="preset-emoji">🍌</span>
-              <span class="preset-name">Curved Banana</span>
-              <span class="preset-tag">~21% Curve</span>
-            </button>
-            <button class="preset-btn" data-preset="straight">
-              <span class="preset-emoji">📏</span>
-              <span class="preset-name">Straight Specimen</span>
-              <span class="preset-tag">&lt;5% Curve</span>
-            </button>
-            <button class="preset-btn" data-preset="wood">
-              <span class="preset-emoji">🪵</span>
-              <span class="preset-name">Wooden Table</span>
-              <span class="preset-tag">Real Photo</span>
-            </button>
-            <button class="preset-btn" data-preset="boomerang">
-              <span class="preset-emoji">🪃</span>
-              <span class="preset-name">Boomerang Hook</span>
-              <span class="preset-tag">&gt;28% Curve</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Segmentation Strategy Selector -->
-        <div class="card config-card">
-          <h3 class="section-title">Segmentation Strategy</h3>
-          <select id="strategySelect" class="styled-select">
-            <option value="auto">Auto (Adaptive GrabCut + Multi-Tier Plausibility)</option>
-            <option value="wood">Wood Surface / Warm Background Optimizer</option>
-            <option value="hsv">Direct HSV Banana Peel Range</option>
-            <option value="otsu">Grayscale Adaptive Otsu</option>
-          </select>
-          <button id="analyzeBtn" class="btn-analyze">
-            <span class="btn-text">Execute Curvature Analysis</span>
-            <div class="spinner-small" id="btnSpinner"></div>
-          </button>
-        </div>
-      </section>
-
-      <!-- Right Column: Visualizer & Metrics Bento -->
-      <section class="results-panel">
-        <!-- Hero Metrics Bento Grid -->
-        <div class="bento-row">
-          <!-- Primary Score Card -->
-          <div class="card score-hero-card">
-            <div class="score-header">
-              <span class="card-label">GEOMETRIC CURVATURE SCORE</span>
-              <span class="badge" id="categoryBadge">Analyzing...</span>
-            </div>
-            <div class="score-display">
-              <div class="score-number-group">
-                <span class="score-value" id="curveScoreVal">--.-</span>
-                <span class="score-unit">%</span>
-              </div>
-              <!-- Mini Arc Gauge -->
-              <div class="gauge-container">
-                <svg viewBox="0 0 100 50" class="gauge-svg">
-                  <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="8" stroke-linecap="round"/>
-                  <path id="gaugePath" d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="url(#gaugeGrad)" stroke-width="8" stroke-dasharray="125.6" stroke-dashoffset="125.6" stroke-linecap="round"/>
-                  <defs>
-                    <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stop-color="#10b981"/>
-                      <stop offset="50%" stop-color="#facc15"/>
-                      <stop offset="100%" stop-color="#ef4444"/>
-                    </linearGradient>
-                  </defs>
-                </svg>
-              </div>
-            </div>
-            <p class="score-formula" id="scoreFormula">Formula: Score = ((Path Length / Chord Distance) - 1) × 100%</p>
-          </div>
-
-          <!-- Quick Metrics Bento Block -->
-          <div class="metrics-quad">
-            <div class="card metric-tile">
-              <span class="metric-label">PATH LENGTH (L)</span>
-              <span class="metric-val" id="pathLenVal">--</span>
-              <span class="metric-sub">Arc length along spine</span>
-            </div>
-            <div class="card metric-tile">
-              <span class="metric-label">CHORD DISTANCE (D)</span>
-              <span class="metric-val" id="chordDistVal">--</span>
-              <span class="metric-sub">Tip-to-tip straight chord</span>
-            </div>
-            <div class="card metric-tile">
-              <span class="metric-label">SAGITTA / DEFLECTION</span>
-              <span class="metric-val" id="deflectionVal">--</span>
-              <span class="metric-sub">Max perpendicular bulge</span>
-            </div>
-            <div class="card metric-tile">
-              <span class="metric-label">CV CONFIDENCE</span>
-              <span class="metric-val text-neon" id="confidenceVal">--</span>
-              <span class="metric-sub" id="methodVal">Adaptive GrabCut</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Visualizer Container Card -->
-        <div class="card visualizer-card">
-          <div class="visualizer-header">
-            <div class="tab-group">
-              <button class="vis-tab active" data-tab="annotated">Annotated Camera View</button>
-              <button class="vis-tab" data-tab="isolated">Isolated Laboratory Silhouette</button>
-            </div>
-
-            <div class="vis-actions">
-              <button id="downloadBtn" class="btn-pill" title="Download Analysis Overlay">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                Export Image
-              </button>
-            </div>
-          </div>
-
-          <!-- Canvas / Image Stage Area -->
-          <div class="image-stage" id="imageStage">
-            <div class="loading-overlay" id="loadingOverlay">
-              <div class="pulsing-banana">🍌</div>
-              <p class="loading-text" id="loadingText">Processing Computer Vision Geometry...</p>
-              <p class="loading-hint">Tracing end-to-end spine and calculating curvature</p>
-            </div>
-            <img id="displayImg" src="" alt="Banana Analysis Preview" class="stage-img">
-          </div>
-
-          <!-- Legend Bar -->
-          <div class="visual-legend">
-            <div class="legend-item"><span class="legend-dot dot-cyan"></span> Spine Centerline</div>
-            <div class="legend-item"><span class="legend-dot dot-orange"></span> Chord Distance</div>
-            <div class="legend-item"><span class="legend-dot dot-yellow"></span> Osculating Circle (C, R)</div>
-            <div class="legend-item"><span class="legend-dot dot-magenta"></span> Sagitta Deflection</div>
-            <div class="legend-item"><span class="legend-dot dot-green"></span> End-to-End Tips</div>
-          </div>
-        </div>
-      </section>
-    </main>
+    <div class="wake-hint" id="wakeHint">Connecting to AI curvature engine on Render...</div>
   </div>
 
-  <script src="app.js"></script>
+  <!-- Full-Screen Streamlit Web Application Frame -->
+  <iframe
+    id="appFrame"
+    src="https://banana-curve-analyzer.onrender.com"
+    allow="clipboard-read; clipboard-write; camera"
+    loading="eager"
+  ></iframe>
+
+  <script>
+    const frame = document.getElementById("appFrame");
+    const loader = document.getElementById("loaderOverlay");
+    const wakeHint = document.getElementById("wakeHint");
+
+    // Hide loader once the iframe responds
+    frame.addEventListener("load", () => {
+      setTimeout(() => {
+        loader.classList.add("hidden");
+      }, 800);
+    });
+
+    // Fallback: If cold start on Render takes ~25s, notify user nicely
+    setTimeout(() => {
+      if (!loader.classList.contains("hidden")) {
+        wakeHint.textContent = "Waking up server container (~20 seconds on free tier)...";
+      }
+    }, 6000);
+
+    setTimeout(() => {
+      if (!loader.classList.contains("hidden")) {
+        wakeHint.textContent = "Almost ready! Finalizing laboratory workstation...";
+      }
+    }, 18000);
+
+    // Hard safety timeout: reveal frame after 35s even if load event was masked
+    setTimeout(() => {
+      loader.classList.add("hidden");
+    }, 35000);
+  </script>
 </body>
 </html>
