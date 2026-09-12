@@ -1,4 +1,8 @@
-# 🍌 Banana Curve Analyzer
+# 🍌 Banana Curve Analyzer — Chill Ethakaaa
+
+<p align="center">
+  <img src="assets/cover.png" alt="Chill Ethakaaa Cover" width="600" style="border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+</p>
 
 A computer vision and geometric analysis system that inspects an image of a single banana to determine:
 1. **Whether the banana is curved** (Boolean classification).

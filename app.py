@@ -301,10 +301,11 @@ st.html(
         letter-spacing: 0.06em;
     }
 
-    /* Custom Streamlit File Uploader: High-Contrast, Vibrant, Highly Visible */
+    /* Custom Streamlit File Uploader: High-Contrast, Vibrant, Perfectly Centered */
     [data-testid="stFileUploader"] {
         max-width: 580px;
         margin: 0 auto 2rem auto;
+        text-align: center !important;
     }
     [data-testid="stFileUploaderDropzone"] {
         background-color: #FFFFFF !important;
@@ -313,13 +314,39 @@ st.html(
         padding: 1.8rem 1.5rem !important;
         box-shadow: 0 4px 16px rgba(244, 180, 0, 0.08) !important;
         transition: all 0.25s ease !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-align: center !important;
     }
     [data-testid="stFileUploaderDropzone"]:hover {
         border-color: #CA8A04 !important;
         background-color: #FFFDF5 !important;
         box-shadow: 0 6px 20px rgba(244, 180, 0, 0.16) !important;
     }
-    /* The Upload / Browse Button: Vibrant, Bold, Highly Visible! */
+    [data-testid="stFileUploaderDropzone"] > div {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-align: center !important;
+        margin: 0 auto !important;
+        gap: 0.85rem !important;
+        width: 100% !important;
+    }
+    [data-testid="stFileUploaderDropzone"] > div > div {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-align: center !important;
+        margin: 0 auto !important;
+        gap: 0.85rem !important;
+    }
+    /* The Upload / Browse Button: Vibrant, Bold, Perfectly Centered */
     [data-testid="stFileUploaderDropzone"] button,
     [data-testid="stFileUploader"] section button {
         background: linear-gradient(135deg, #F4B400, #EAB308) !important;
@@ -334,6 +361,10 @@ st.html(
         box-shadow: 0 4px 14px rgba(244, 180, 0, 0.35) !important;
         cursor: pointer !important;
         transition: all 0.15s ease !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        margin: 0 !important;
     }
     [data-testid="stFileUploaderDropzone"] button:hover,
     [data-testid="stFileUploader"] section button:hover {
@@ -342,12 +373,20 @@ st.html(
         background: linear-gradient(135deg, #F59E0B, #D97706) !important;
         color: #FFFFFF !important;
     }
+    [data-testid="stFileUploaderDropzoneInstructions"],
+    [data-testid="stFileUploaderDropzone"] span,
+    [data-testid="stFileUploaderDropzone"] small {
+        color: #5A5954 !important;
+        font-size: 0.85rem !important;
+        text-align: center !important;
+    }
     [data-testid="stFileUploaderFileData"] {
         background-color: #FFFFFF !important;
         border: 1.5px solid #EAB308 !important;
         border-radius: 8px !important;
         padding: 0.6rem 0.9rem !important;
         box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
+        margin: 0.5rem auto 0 auto !important;
     }
 
     /* === 3. Dominant Result Card (CURVE SCORE) === */
