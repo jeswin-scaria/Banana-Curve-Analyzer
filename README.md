@@ -4,6 +4,18 @@
   <img src="assets/cover.png" alt="Chill Ethakaaa Cover" width="600" style="border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
 </p>
 
+## 📸 Visual Showcase & Laboratory Workstation
+
+| Geometric Overlay & Centerline Spline | Precision Metrics & Deflection Gauge |
+| :---: | :---: |
+| <img src="assets/geometric_overlay.jpg" alt="Banana Curvature Analysis Overlay" width="480"/> | <img src="assets/metrics_dashboard.png" alt="Banana Metrics Dashboard" width="480"/> |
+
+| Kerala Botanical Astrology (Pazha Jathakam) | Official Curvature Bureau Certificate |
+| :---: | :---: |
+| <img src="assets/banana_horoscope.png" alt="Pazha Jathakam Banana Horoscope" width="480"/> | <img src="assets/official_certificate.png" alt="Official Certificate of Curvature" width="480"/> |
+
+---
+
 A computer vision and geometric analysis system that inspects an image of a single banana to determine:
 1. **Whether the banana is curved** (Boolean classification).
 2. **How much it is curved** (quantitative geometric deflection & path metrics).
