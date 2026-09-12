@@ -40,6 +40,34 @@ def draw_dashed_line(
         cv2.line(img, p_start, p_end, color, thickness, cv2.LINE_AA)
 
 
+def compute_center_of_curvature(
+    p1: Tuple[float, float],
+    apex: Tuple[float, float],
+    p2: Tuple[float, float],
+) -> Tuple[Optional[Tuple[float, float]], float]:
+    """
+    Calculate center of curvature (circumcircle center of P1, Apex, P2) and radius R.
+    Returns ((xc, yc), R).
+    """
+    x1, y1 = p1
+    xa, ya = apex
+    x2, y2 = p2
+
+    D = 2.0 * (x1 * (ya - y2) + xa * (y2 - y1) + x2 * (y1 - ya))
+    if abs(D) < 1e-5:
+        return None, 0.0
+
+    sq1 = x1**2 + y1**2
+    sqa = xa**2 + ya**2
+    sq2 = x2**2 + y2**2
+
+    xc = (sq1 * (ya - y2) + sqa * (y2 - y1) + sq2 * (y1 - ya)) / D
+    yc = (sq1 * (x2 - xa) + sqa * (x1 - x2) + sq2 * (xa - x1)) / D
+    R = float(np.hypot(xa - xc, ya - yc))
+
+    return (xc, yc), R
+
+
 def create_annotated_overlay(
     image_rgb: np.ndarray,
     result: CurvatureAnalysisResult,
@@ -49,28 +77,17 @@ def create_annotated_overlay(
     show_endpoints: bool = True,
     show_deflection: bool = True,
     show_info_card: bool = True,
+    show_curvature_center: bool = True,
 ) -> np.ndarray:
     """
     Produce an annotated RGB image highlighting detected geometry:
     - Green outer contour of the banana
     - Glowing cyan centerline
     - Dashed orange chord (straight-line distance)
+    - Center of Curvature (C) & Radius vector (R)
     - Distinct colored endpoints
     - Maximum deflection (sagitta) line
     - On-screen summary HUD card
-
-    Args:
-        image_rgb: Input RGB image.
-        result: Analysis result dataclass.
-        show_contour: Whether to draw contour outline.
-        show_centerline: Whether to draw centerline path.
-        show_chord: Whether to draw straight chord line.
-        show_endpoints: Whether to draw endpoint markers.
-        show_deflection: Whether to draw deflection line.
-        show_info_card: Whether to draw the top-left summary card.
-
-    Returns:
-        np.ndarray: Annotated RGB image.
     """
     annotated = image_rgb.copy()
     h, w = annotated.shape[:2]
@@ -81,7 +98,6 @@ def create_annotated_overlay(
     point_radius = max(5, scale * 4)
 
     if not result.success:
-        # Draw error notification banner
         cv2.putText(
             annotated,
             result.message or "No banana detected",
@@ -110,24 +126,40 @@ def create_annotated_overlay(
         pts = pts.reshape((-1, 1, 2))
         cv2.polylines(annotated, [pts], isClosed=False, color=(0, 215, 255), thickness=line_thick + 1, lineType=cv2.LINE_AA)
 
-    # 4. Draw maximum deflection line
+    # 4. Draw Center of Curvature & Radius R
+    if show_curvature_center and result.endpoint_1 and result.endpoint_2 and result.apex_point:
+        c_pt, R = compute_center_of_curvature(result.endpoint_1, result.apex_point, result.endpoint_2)
+        if c_pt is not None and 10 < R < max(h, w) * 4:
+            xc, yc = int(round(c_pt[0])), int(round(c_pt[1]))
+            apex_i = (int(round(result.apex_point[0])), int(round(result.apex_point[1])))
+
+            # Draw Osculating Arc/Circle
+            if 0 <= xc < w and 0 <= yc < h:
+                cv2.circle(annotated, (xc, yc), int(round(R)), (255, 215, 0), max(1, line_thick - 1), cv2.LINE_AA)
+
+            # Draw Radius Vector R
+            if 0 <= xc < w*2 and 0 <= yc < h*2:
+                cv2.line(annotated, (xc, yc), apex_i, (255, 215, 0), line_thick, cv2.LINE_AA)
+                cv2.circle(annotated, (xc, yc), point_radius, (255, 215, 0), -1, cv2.LINE_AA)
+                cv2.putText(annotated, "C", (xc + 8, yc - 8), cv2.FONT_HERSHEY_SIMPLEX, 0.5 * scale, (255, 215, 0), 2, cv2.LINE_AA)
+
+    # 5. Draw maximum deflection line
     if show_deflection and result.apex_point and result.apex_chord_foot and result.max_deflection > 2.0:
         apex = (int(round(result.apex_point[0])), int(round(result.apex_point[1])))
         foot = (int(round(result.apex_chord_foot[0])), int(round(result.apex_chord_foot[1])))
         draw_dashed_line(annotated, apex, foot, (255, 50, 215), thickness=max(1, line_thick - 1), dash_length=max(4, scale * 4))
         cv2.circle(annotated, apex, max(3, point_radius - 2), (255, 50, 215), -1, cv2.LINE_AA)
 
-    # 5. Draw endpoints
+    # 6. Draw endpoints
     if show_endpoints and result.endpoint_1 and result.endpoint_2:
         p1 = (int(round(result.endpoint_1[0])), int(round(result.endpoint_1[1])))
         p2 = (int(round(result.endpoint_2[0])), int(round(result.endpoint_2[1])))
-        # Outer rings
         cv2.circle(annotated, p1, point_radius + 2, (0, 0, 0), -1, cv2.LINE_AA)
         cv2.circle(annotated, p1, point_radius, (34, 197, 94), -1, cv2.LINE_AA)
         cv2.circle(annotated, p2, point_radius + 2, (0, 0, 0), -1, cv2.LINE_AA)
         cv2.circle(annotated, p2, point_radius, (234, 179, 8), -1, cv2.LINE_AA)
 
-    # 6. Draw semi-transparent information card in corner
+    # 7. Draw semi-transparent information card in corner
     if show_info_card:
         card_w, card_h = int(min(320, w * 0.45)), int(min(140, h * 0.35))
         overlay = annotated.copy()
@@ -149,6 +181,100 @@ def create_annotated_overlay(
         cv2.putText(annotated, f"Chord Dist:  {result.chord_distance:.1f} px", (25, 42 + line_spacing * 3), font, font_scale - 0.1, (200, 200, 200), 1, cv2.LINE_AA)
 
     return annotated
+
+
+def create_isolated_shape_overlay(
+    image_rgb: np.ndarray,
+    result: CurvatureAnalysisResult,
+    show_contour: bool = True,
+    show_centerline: bool = True,
+    show_chord: bool = True,
+    show_endpoints: bool = True,
+    show_deflection: bool = True,
+    show_curvature_center: bool = True,
+) -> np.ndarray:
+    """
+    Produce a clean isolated geometric shape overlay:
+    - Removes all background photos, table, pen, and noise
+    - Renders pure banana shape/mask silhouette on sleek dark canvas
+    - Overlays Center of Curvature (C), Radius R, Osculating Circle, Chord (D), Centerline, and Endpoints
+    """
+    h, w = image_rgb.shape[:2]
+    canvas = np.zeros((h, w, 3), dtype=np.uint8)
+    canvas[:] = (15, 20, 30)  # Sleek dark navy laboratory background
+
+    if not result.success:
+        return canvas
+
+    # Render isolated banana shape mask silhouette
+    if result.binary_mask is not None:
+        mask_bool = result.binary_mask > 0
+        canvas[mask_bool] = (40, 50, 70)
+        shape_fill = np.zeros_like(canvas)
+        shape_fill[mask_bool] = (244, 212, 100)  # Gold banana silhouette fill
+        cv2.addWeighted(shape_fill, 0.28, canvas, 0.72, 0, canvas)
+
+    scale = max(1, int(np.sqrt(h * w) / 500))
+    line_thick = max(2, scale * 2)
+    point_radius = max(5, scale * 4)
+
+    # 1. Draw contour outline
+    if show_contour and result.contour is not None:
+        cv2.drawContours(canvas, [result.contour], -1, (34, 197, 94), max(2, line_thick), cv2.LINE_AA)
+
+    # 2. Draw Center of Curvature (C) & Radius (R) & Osculating Circle
+    if show_curvature_center and result.endpoint_1 and result.endpoint_2 and result.apex_point:
+        c_pt, R = compute_center_of_curvature(result.endpoint_1, result.apex_point, result.endpoint_2)
+        if c_pt is not None and 10 < R < max(h, w) * 5:
+            xc, yc = int(round(c_pt[0])), int(round(c_pt[1]))
+            apex_i = (int(round(result.apex_point[0])), int(round(result.apex_point[1])))
+
+            # Draw Osculating Circle
+            cv2.circle(canvas, (xc, yc), int(round(R)), (250, 204, 21), max(1, line_thick - 1), cv2.LINE_AA)
+            
+            # Draw Radius Line R
+            cv2.line(canvas, (xc, yc), apex_i, (250, 204, 21), line_thick, cv2.LINE_AA)
+            
+            # Draw Center Marker C
+            cv2.circle(canvas, (xc, yc), point_radius + 2, (250, 204, 21), -1, cv2.LINE_AA)
+            
+            # Labels
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            font_s = 0.5 * scale
+            cv2.putText(canvas, f"Center of Curvature (C)", (xc + 10, yc - 10), font, font_s, (250, 204, 21), 2, cv2.LINE_AA)
+            cv2.putText(canvas, f"Radius R={R:.0f}px", (int((xc + apex_i[0]) / 2) + 6, int((yc + apex_i[1]) / 2)), font, font_s - 0.05, (250, 204, 21), 1, cv2.LINE_AA)
+
+    # 3. Draw straight chord line (D)
+    if show_chord and result.endpoint_1 and result.endpoint_2:
+        p1_i = (int(round(result.endpoint_1[0])), int(round(result.endpoint_1[1])))
+        p2_i = (int(round(result.endpoint_2[0])), int(round(result.endpoint_2[1])))
+        draw_dashed_line(canvas, p1_i, p2_i, (249, 115, 22), thickness=line_thick, dash_length=max(6, scale * 6))
+        mid_x, mid_y = int((p1_i[0] + p2_i[0]) / 2), int((p1_i[1] + p2_i[1]) / 2)
+        cv2.putText(canvas, f"Chord D={result.chord_distance:.0f}px", (mid_x - 35, mid_y + 22), cv2.FONT_HERSHEY_SIMPLEX, 0.48 * scale, (249, 115, 22), 2, cv2.LINE_AA)
+
+    # 4. Draw centerline curve
+    if show_centerline and result.centerline_points is not None and len(result.centerline_points) > 1:
+        pts = np.round(result.centerline_points).astype(np.int32)
+        pts = pts.reshape((-1, 1, 2))
+        cv2.polylines(canvas, [pts], isClosed=False, color=(6, 182, 212), thickness=line_thick + 2, lineType=cv2.LINE_AA)
+
+    # 5. Draw maximum deflection line
+    if show_deflection and result.apex_point and result.apex_chord_foot and result.max_deflection > 2.0:
+        apex = (int(round(result.apex_point[0])), int(round(result.apex_point[1])))
+        foot = (int(round(result.apex_chord_foot[0])), int(round(result.apex_chord_foot[1])))
+        draw_dashed_line(canvas, apex, foot, (236, 72, 153), thickness=line_thick, dash_length=max(4, scale * 4))
+        cv2.circle(canvas, apex, max(3, point_radius - 2), (236, 72, 153), -1, cv2.LINE_AA)
+
+    # 6. Draw endpoints
+    if show_endpoints and result.endpoint_1 and result.endpoint_2:
+        p1_i = (int(round(result.endpoint_1[0])), int(round(result.endpoint_1[1])))
+        p2_i = (int(round(result.endpoint_2[0])), int(round(result.endpoint_2[1])))
+        cv2.circle(canvas, p1_i, point_radius + 2, (0, 0, 0), -1, cv2.LINE_AA)
+        cv2.circle(canvas, p1_i, point_radius, (34, 197, 94), -1, cv2.LINE_AA)
+        cv2.circle(canvas, p2_i, point_radius + 2, (0, 0, 0), -1, cv2.LINE_AA)
+        cv2.circle(canvas, p2_i, point_radius, (234, 179, 8), -1, cv2.LINE_AA)
+
+    return canvas
 
 
 def create_diagnostic_figure(

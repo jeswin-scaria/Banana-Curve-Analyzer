@@ -9,8 +9,8 @@ from .config import (
     CATEGORY_CURVED,
     CATEGORY_HIGHLY_CURVED,
 )
-from .preprocessing import load_image, segment_banana
-from .skeleton import extract_skeleton, trace_longest_centerline
+from .preprocessing import load_image, segment_banana, segment_banana_scored
+from .skeleton import extract_skeleton, trace_longest_centerline, prune_skeleton_spurs
 from .analyzer import (
     CurvatureAnalysisResult,
     analyze_banana,
@@ -19,7 +19,12 @@ from .analyzer import (
     calculate_curve_score,
     classify_curvature,
 )
-from .visualization import create_annotated_overlay, create_diagnostic_figure
+from .visualization import (
+    create_annotated_overlay,
+    create_isolated_shape_overlay,
+    create_diagnostic_figure,
+    compute_center_of_curvature,
+)
 
 __all__ = [
     "STRAIGHT_THRESHOLD",
@@ -29,8 +34,10 @@ __all__ = [
     "CATEGORY_HIGHLY_CURVED",
     "load_image",
     "segment_banana",
+    "segment_banana_scored",
     "extract_skeleton",
     "trace_longest_centerline",
+    "prune_skeleton_spurs",
     "CurvatureAnalysisResult",
     "analyze_banana",
     "calculate_chord_distance",
@@ -38,5 +45,7 @@ __all__ = [
     "calculate_curve_score",
     "classify_curvature",
     "create_annotated_overlay",
+    "create_isolated_shape_overlay",
     "create_diagnostic_figure",
+    "compute_center_of_curvature",
 ]

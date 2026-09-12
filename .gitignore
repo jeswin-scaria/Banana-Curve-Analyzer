@@ -49,3 +49,7 @@ ehthumbs.db
 
 # Streamlit
 .streamlit/
+
+# Claude
+.claude/
+

@@ -1,17 +1,17 @@
 """
-🍌 Banan-AI Curve Analyzer - Futuristic Light-Mode AI Laboratory
-A state-of-the-art, ultra-modern computer vision laboratory for banana geometry analysis.
-Built with clean porcelain white canvas, Apple/Linear aesthetic, high-contrast typography,
-dynamic reactive SVG mascot, interactive curvature sandbox, and downloadable IBBC certification.
+🍌 CHILL ETHAKAAA — BANANA GEOMETRY LAB
+"Measuring what never needed to be measured."
+A premium, sophisticated computer-vision instrument for geometric banana curvature analysis.
 """
 
 import os
 import json
 import time
 import base64
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 import numpy as np
 import streamlit as st
+import streamlit.components.v1 as components
 import cv2
 from PIL import Image
 
@@ -27,781 +27,1536 @@ from src.config import (
 )
 from src.preprocessing import load_image
 from src.analyzer import analyze_banana, CurvatureAnalysisResult
-from src.visualization import create_annotated_overlay, create_diagnostic_figure
+from src.visualization import create_annotated_overlay, create_diagnostic_figure, create_isolated_shape_overlay
+from src.fun_modules import render_absurd_interactive_hub
 
-# -----------------------------------------------------------------------------
-# Streamlit Application Configuration
-# -----------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# Fullscreen Comic Splash Screen ("MELCOW")
+# ---------------------------------------------------------------------------
+def render_splash_screen():
+    img_path = os.path.join(os.path.dirname(__file__), "assets", "melcow.jpg")
+    b64_str = ""
+    if os.path.exists(img_path):
+        with open(img_path, "rb") as f:
+            b64_str = base64.b64encode(f.read()).decode("utf-8")
+    
+    img_src = f"data:image/jpeg;base64,{b64_str}" if b64_str else ""
+    
+    splash_script = f"""
+    <script>
+    (function() {{
+        try {{
+            var targetWin = window.parent || window;
+            var targetDoc = (window.parent && window.parent.document) ? window.parent.document : document;
+
+            if (targetWin._splashDismissed || targetWin.sessionStorage.getItem('banana_splash_dismissed') === 'true') {{
+                return;
+            }}
+
+            var existing = targetDoc.getElementById('comic-splash-overlay');
+            if (existing) {{
+                return;
+            }}
+
+            var overlay = targetDoc.createElement('div');
+            overlay.id = 'comic-splash-overlay';
+            overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 999999999; background-color: #0a0b10; background-image: url("{img_src}"); background-position: center center; background-repeat: no-repeat; background-size: contain; pointer-events: none; transition: opacity 1.5s ease-in-out, visibility 1.5s ease-in-out; opacity: 1; visibility: visible;';
+
+            targetDoc.body.appendChild(overlay);
+
+            function autoDismiss() {{
+                targetWin._splashDismissed = true;
+                try {{ targetWin.sessionStorage.setItem('banana_splash_dismissed', 'true'); }} catch(err) {{}}
+
+                var el = targetDoc.getElementById('comic-splash-overlay');
+                if (el) {{
+                    el.style.opacity = '0';
+                    el.style.visibility = 'hidden';
+                    setTimeout(function() {{
+                        if (el && el.parentNode) {{
+                            el.parentNode.removeChild(el);
+                        }}
+                    }}, 1600);
+                }}
+            }}
+
+            // Automatically transition to the main app after 3 seconds with a 1.5s smooth fade
+            setTimeout(autoDismiss, 3000);
+        }} catch(e) {{
+            console.error('Splash error:', e);
+        }}
+    }})();
+    </script>
+    """
+    components.html(splash_script, height=0, width=0)
+
+# ---------------------------------------------------------------------------
+# Page Configuration
+# ---------------------------------------------------------------------------
 st.set_page_config(
-    page_title="Banan-AI Vision Lab 🍌",
+    page_title="CHILL ETHAKAAA | Banana Geometry Lab",
     page_icon="🍌",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="collapsed",
 )
 
-# -----------------------------------------------------------------------------
-# Futuristic Light-Mode AI Design System & Styling
-# -----------------------------------------------------------------------------
+render_splash_screen()
+
+# ---------------------------------------------------------------------------
+# Premium Scientific Laboratory & Official Certificate Design System
+# ---------------------------------------------------------------------------
 st.html(
     """
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,400;1,600&family=Alex+Brush&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&display=swap');
 
     :root {
-        --font-display: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
-        --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+        --bg-ivory: #F8F5EC;
+        --surface-white: #FFFFFF;
+        --surface-warm: #FCFAF6;
+        --text-charcoal: #171717;
+        --text-secondary: #5A5954;
+        --text-muted: #8E8D86;
+        --accent-yellow: #F4B400;
+        --accent-yellow-light: #FFF9E6;
+        --accent-yellow-border: #FBE6A2;
+        --accent-olive: #66734A;
+        --accent-olive-light: #F2F5ED;
+        --accent-olive-border: #D1DBC1;
+        --border-gray: #E5E0D4;
+        --border-subtle: #EDE8DE;
+        --border-dark: #171717;
         
-        --bg-canvas: #ffffff;
-        --bg-subtle: #f8fafc;
-        --bg-card: #ffffff;
-        --border-subtle: #e2e8f0;
-        --border-hover: #f59e0b;
-        
-        --brand-gold: #eab308;
-        --brand-amber: #d97706;
-        --brand-orange: #ea580c;
-        --tech-cyan: #0284c7;
-        
-        --text-primary: #0f172a;
-        --text-secondary: #475569;
-        --text-muted: #64748b;
+        --font-sans: 'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif;
+        --font-body: 'Inter', -apple-system, sans-serif;
+        --font-mono: 'JetBrains Mono', monospace;
+        --font-serif: 'Newsreader', Georgia, serif;
+        --font-diploma: 'Cinzel', serif;
+        --font-cert-head: 'Playfair Display', Georgia, serif;
+        --font-script: 'Alex Brush', cursive;
     }
 
-    /* Global Light Background */
-    .stApp {
-        background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%) !important;
-        color: var(--text-primary) !important;
+    /* === Global Canvas Override === */
+    .stApp, [data-testid="stAppViewContainer"] {
+        background-color: var(--bg-ivory) !important;
+        color: var(--text-charcoal) !important;
         font-family: var(--font-body) !important;
     }
 
-    /* Sidebar Light Styling */
-    [data-testid="stSidebar"] {
-        background: #f8fafc !important;
-        border-right: 1px solid #e2e8f0 !important;
-    }
-    [data-testid="stSidebar"] * {
-        color: #1e293b !important;
-    }
-
-    h1, h2, h3, h4, h5, h6 {
-        font-family: var(--font-display) !important;
-        color: var(--text-primary) !important;
+    /* Streamlit Main Content Container Constraints */
+    .main .block-container {
+        max-width: 1120px !important;
+        padding-top: 2.2rem !important;
+        padding-bottom: 4rem !important;
+        padding-left: 2rem !important;
+        padding-right: 2rem !important;
     }
 
-    /* Top Navigation Header */
-    .brand-logo {
+    /* Force all base typography */
+    h1, h2, h3, h4, h5, h6, p, span, label, div {
+        color: var(--text-charcoal);
+    }
+
+    /* Hide Streamlit Header & Clutter */
+    header[data-testid="stHeader"] {
+        background: transparent !important;
+    }
+    #MainMenu, footer {
+        visibility: hidden;
+    }
+
+    /* === 1. Premium Brand Header centered === */
+    .brand-hero {
         display: flex;
+        flex-direction: column;
         align-items: center;
-        gap: 14px;
-        margin-bottom: 0.3rem;
+        justify-content: center;
+        text-align: center;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--border-gray);
+        margin-bottom: 1.75rem;
+        gap: 0.75rem;
+    }
+
+    .brand-identity {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        gap: 0.5rem;
+    }
+
+    .brand-mark {
+        font-size: 3.2rem;
+        line-height: 1;
+        filter: drop-shadow(0 2px 10px rgba(244, 180, 0, 0.3));
+        user-select: none;
     }
 
     .brand-title {
-        font-family: var(--font-display);
-        font-size: 2.6rem;
-        font-weight: 900;
-        letter-spacing: -0.8px;
-        background: linear-gradient(135deg, #ca8a04 0%, #eab308 30%, #ea580c 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+        font-family: var(--font-sans);
+        font-size: 2.3rem;
+        font-weight: 800;
+        letter-spacing: 0.02em;
+        word-spacing: 0.06em;
+        color: var(--text-charcoal);
+        line-height: 1.15;
         margin: 0;
-        line-height: 1.1;
+        text-align: center;
     }
 
     .brand-subtitle {
-        font-size: 1.05rem;
-        color: var(--text-secondary);
-        margin-top: 4px;
-        font-weight: 500;
+        font-family: var(--font-mono);
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--accent-olive);
+        margin-top: 0.3rem;
+        text-align: center;
     }
 
-    .status-pill {
+    .brand-status {
         display: inline-flex;
         align-items: center;
-        gap: 8px;
-        background: #f0fdf4;
-        color: #16a34a;
-        border: 1px solid #86efac;
+        gap: 0.6rem;
+        background: var(--surface-white);
+        border: 1px solid var(--border-gray);
         border-radius: 9999px;
-        padding: 5px 16px;
-        font-size: 0.8rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.8px;
-        box-shadow: 0 2px 6px rgba(22, 163, 74, 0.08);
+        padding: 0.5rem 1.15rem;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.03);
     }
 
     .status-dot {
         width: 8px;
         height: 8px;
-        background-color: #16a34a;
+        background-color: var(--accent-olive);
         border-radius: 50%;
-        box-shadow: 0 0 6px #22c55e;
+        display: inline-block;
     }
 
-    /* Modern Elevated White Bento Card Architecture */
-    .bento-card {
-        background: #ffffff !important;
-        border: 1px solid #e2e8f0 !important;
-        border-radius: 18px !important;
-        padding: 22px !important;
-        box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.02) !important;
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        margin-bottom: 10px !important;
+    .status-text {
+        font-family: var(--font-mono);
+        font-size: 0.74rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--text-secondary);
     }
 
-    .bento-card:hover {
-        transform: translateY(-3px) !important;
-        box-shadow: 0 12px 28px -4px rgba(245, 158, 11, 0.15), 0 4px 10px -2px rgba(0, 0, 0, 0.04) !important;
-        border-color: #facc15 !important;
+    .brand-tagline {
+        font-family: var(--font-serif);
+        font-style: italic;
+        font-size: 1.1rem;
+        color: var(--text-secondary);
+        margin-top: -0.75rem;
+        margin-bottom: 2.2rem;
     }
 
-    .kpi-val {
-        font-family: var(--font-display);
-        font-size: 2.5rem;
-        font-weight: 900;
-        line-height: 1.1;
-        letter-spacing: -0.5px;
-        color: #0f172a;
+    /* === 2. Image Ingestion Station === */
+    .ingestion-card {
+        background: var(--surface-white);
+        border: 1px solid var(--border-gray);
+        border-radius: 12px;
+        padding: 2.2rem 2rem 1.6rem 2rem;
+        text-align: center;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.025);
+        margin-bottom: 1.2rem;
     }
 
-    .kpi-unit {
-        font-size: 1rem;
-        font-weight: 600;
+    .ingestion-eyebrow {
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--accent-olive);
+        font-weight: 700;
+        margin-bottom: 0.4rem;
+    }
+
+    .ingestion-title {
+        font-family: var(--font-sans);
+        font-size: 1.65rem;
+        font-weight: 800;
+        letter-spacing: -0.01em;
+        color: var(--text-charcoal);
+        margin: 0 0 0.45rem 0;
+        line-height: 1.3;
+    }
+
+    .ingestion-prompt {
+        font-family: var(--font-body);
+        font-size: 0.95rem;
+        color: var(--text-secondary);
+        max-width: 480px;
+        margin: 0 auto 0.75rem auto;
+        line-height: 1.5;
+    }
+
+    .ingestion-formats {
+        font-family: var(--font-mono);
+        font-size: 0.74rem;
         color: var(--text-muted);
+        letter-spacing: 0.06em;
+    }
+
+    /* Custom Streamlit File Uploader: High-Contrast, Vibrant, Highly Visible */
+    [data-testid="stFileUploader"] {
+        max-width: 580px;
+        margin: 0 auto 2rem auto;
+    }
+    [data-testid="stFileUploaderDropzone"] {
+        background-color: #FFFFFF !important;
+        border: 2px dashed #EAB308 !important;
+        border-radius: 12px !important;
+        padding: 1.8rem 1.5rem !important;
+        box-shadow: 0 4px 16px rgba(244, 180, 0, 0.08) !important;
+        transition: all 0.25s ease !important;
+    }
+    [data-testid="stFileUploaderDropzone"]:hover {
+        border-color: #CA8A04 !important;
+        background-color: #FFFDF5 !important;
+        box-shadow: 0 6px 20px rgba(244, 180, 0, 0.16) !important;
+    }
+    /* The Upload / Browse Button: Vibrant, Bold, Highly Visible! */
+    [data-testid="stFileUploaderDropzone"] button,
+    [data-testid="stFileUploader"] section button {
+        background: linear-gradient(135deg, #F4B400, #EAB308) !important;
+        color: #171717 !important;
+        border: 2px solid #CA8A04 !important;
+        border-radius: 8px !important;
+        font-family: var(--font-sans) !important;
+        font-size: 0.95rem !important;
+        font-weight: 800 !important;
+        letter-spacing: 0.04em !important;
+        padding: 0.65rem 1.6rem !important;
+        box-shadow: 0 4px 14px rgba(244, 180, 0, 0.35) !important;
+        cursor: pointer !important;
+        transition: all 0.15s ease !important;
+    }
+    [data-testid="stFileUploaderDropzone"] button:hover,
+    [data-testid="stFileUploader"] section button:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 18px rgba(244, 180, 0, 0.5) !important;
+        background: linear-gradient(135deg, #F59E0B, #D97706) !important;
+        color: #FFFFFF !important;
+    }
+    [data-testid="stFileUploaderFileData"] {
+        background-color: #FFFFFF !important;
+        border: 1.5px solid #EAB308 !important;
+        border-radius: 8px !important;
+        padding: 0.6rem 0.9rem !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
+    }
+
+    /* === 3. Dominant Result Card (CURVE SCORE) === */
+    .score-hero-card {
+        background: var(--surface-white);
+        border: 1px solid var(--border-gray);
+        border-radius: 12px;
+        padding: 2.2rem 2.4rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.025);
+        margin-bottom: 1.75rem;
+    }
+
+    .score-eyebrow {
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--accent-olive);
+        margin-bottom: 0.4rem;
+    }
+
+    .score-label {
+        font-family: var(--font-sans);
+        font-size: 0.95rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+    }
+
+    .score-display-row {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 1.75rem;
+    }
+
+    .score-giant-number {
+        font-family: var(--font-mono);
+        font-size: 4.2rem;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+        line-height: 1;
+        color: var(--text-charcoal);
+    }
+
+    .score-giant-percent {
+        font-size: 2.2rem;
+        color: var(--accent-yellow);
+        font-weight: 700;
         margin-left: 2px;
     }
 
-    .kpi-lbl {
-        font-size: 0.8rem;
+    .classification-badge {
+        font-family: var(--font-mono);
+        font-size: 0.85rem;
         font-weight: 700;
-        color: var(--text-muted);
+        letter-spacing: 0.1em;
         text-transform: uppercase;
-        letter-spacing: 0.08em;
-        margin-top: 6px;
+        padding: 0.45rem 1.1rem;
+        border-radius: 6px;
+        border: 1px solid transparent;
     }
 
-    /* Curvature Category Badges */
     .badge-straight {
-        background: #ecfdf5 !important;
-        color: #15803d !important;
-        border: 1.5px solid #86efac !important;
-        padding: 6px 18px !important;
-        border-radius: 9999px !important;
-        font-weight: 800 !important;
-        font-size: 1.05rem !important;
-        display: inline-block !important;
-        letter-spacing: 0.02em !important;
+        background: var(--accent-olive-light);
+        color: var(--accent-olive);
+        border-color: var(--accent-olive-border);
     }
 
     .badge-curved {
-        background: #fffbeb !important;
-        color: #b45309 !important;
-        border: 1.5px solid #fde68a !important;
-        padding: 6px 18px !important;
-        border-radius: 9999px !important;
-        font-weight: 800 !important;
-        font-size: 1.05rem !important;
-        display: inline-block !important;
-        letter-spacing: 0.02em !important;
+        background: var(--accent-yellow-light);
+        color: #8C6600;
+        border-color: var(--accent-yellow-border);
     }
 
     .badge-highly-curved {
-        background: #fef2f2 !important;
-        color: #b91c1c !important;
-        border: 1.5px solid #fca5a5 !important;
-        padding: 6px 18px !important;
-        border-radius: 9999px !important;
-        font-weight: 800 !important;
-        font-size: 1.05rem !important;
-        display: inline-block !important;
-        letter-spacing: 0.02em !important;
+        background: #FDF2E9;
+        color: #B24B00;
+        border-color: #F8D7BE;
     }
 
-    /* Mascot Stage (Light Mode with Warm Ambient Illumination) */
-    .mascot-stage {
-        background: linear-gradient(135deg, #fffbeb 0%, #ffffff 60%, #f0f9ff 100%) !important;
-        border: 1.5px solid #fef08a !important;
-        border-radius: 24px !important;
-        padding: 26px !important;
-        text-align: center !important;
-        margin-bottom: 24px !important;
-        box-shadow: 0 10px 30px -5px rgba(245, 158, 11, 0.12) !important;
+    /* Clean Scientific Visual Scale */
+    .scale-container {
+        margin-top: 1rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border-subtle);
     }
 
-    .speech-bubble {
-        display: inline-block !important;
-        background: #ffffff !important;
-        border: 2px solid #f59e0b !important;
-        border-radius: 18px !important;
-        padding: 14px 24px !important;
-        font-size: 1.1rem !important;
-        font-weight: 600 !important;
-        color: #1e293b !important;
-        margin-bottom: 16px !important;
-        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06) !important;
-        max-width: 85% !important;
-        line-height: 1.5 !important;
+    .scale-boundary-labels {
+        display: flex;
+        justify-content: space-between;
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        margin-bottom: 0.6rem;
     }
 
-    .mascot-title {
-        font-family: var(--font-display) !important;
-        font-size: 1.55rem !important;
-        font-weight: 900 !important;
-        color: #b45309 !important;
-        margin-top: 12px !important;
-        letter-spacing: -0.3px !important;
+    .scale-track-wrapper {
+        position: relative;
+        height: 10px;
+        background: var(--border-subtle);
+        border-radius: 9999px;
+        overflow: visible;
+        margin-bottom: 1.8rem;
     }
 
-    .mascot-subtitle {
-        font-size: 1rem !important;
-        color: #64748b !important;
-        font-weight: 500 !important;
+    .scale-track-segment-1 {
+        position: absolute;
+        left: 0%;
+        width: 14.3%; /* 5% out of 35% */
+        height: 100%;
+        background: #DCE5D1;
+        border-top-left-radius: 9999px;
+        border-bottom-left-radius: 9999px;
     }
 
-    /* Pitch Card in Light Mode */
-    .pitch-banner {
-        background: linear-gradient(135deg, #f0f9ff 0%, #ffffff 100%) !important;
-        border: 2px solid #0284c7 !important;
-        border-radius: 18px !important;
-        padding: 22px !important;
-        margin-bottom: 24px !important;
-        box-shadow: 0 10px 25px -5px rgba(2, 132, 199, 0.1) !important;
+    .scale-track-segment-2 {
+        position: absolute;
+        left: 14.3%;
+        width: 42.8%; /* (20 - 5)% out of 35% */
+        height: 100%;
+        background: #FCE8B2;
     }
 
-    .pitch-header {
-        font-family: var(--font-display) !important;
-        font-size: 1.25rem !important;
-        font-weight: 800 !important;
-        color: #0284c7 !important;
-        display: flex !important;
-        align-items: center !important;
-        gap: 8px !important;
-        margin-bottom: 8px !important;
+    .scale-track-segment-3 {
+        position: absolute;
+        left: 57.1%;
+        width: 42.9%;
+        height: 100%;
+        background: #F8D7BE;
+        border-top-right-radius: 9999px;
+        border-bottom-right-radius: 9999px;
     }
 
-    /* Certificate Box (Clean Ivory Diplomatic Charter) */
-    .cert-container {
-        background: #ffffff !important;
-        border: 3px double #d97706 !important;
-        border-radius: 20px !important;
-        padding: 36px !important;
-        text-align: center !important;
-        box-shadow: 0 12px 35px -5px rgba(217, 119, 6, 0.15) !important;
+    .scale-indicator-pin {
+        position: absolute;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 22px;
+        height: 22px;
+        background: var(--text-charcoal);
+        border: 3.5px solid var(--surface-white);
+        box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+        border-radius: 50%;
+        z-index: 10;
+        transition: left 0.3s ease;
     }
 
-    .cert-seal {
+    .scale-indicator-callout {
+        position: absolute;
+        top: 26px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--text-charcoal);
+        color: #ffffff;
+        font-family: var(--font-mono);
+        font-size: 0.74rem;
+        font-weight: 700;
+        padding: 2px 7px;
+        border-radius: 4px;
+        white-space: nowrap;
+    }
+
+    .scale-axis-ticks {
+        display: flex;
+        justify-content: space-between;
+        font-family: var(--font-mono);
+        font-size: 0.68rem;
+        color: var(--text-muted);
+        margin-top: 0.75rem;
+    }
+
+    /* === 4. Secondary Scientific Measurement Cards === */
+    .measurements-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.25rem;
+        margin-bottom: 2.2rem;
+    }
+
+    .metric-instrument-card {
+        background: var(--surface-white);
+        border: 1px solid var(--border-gray);
+        border-radius: 10px;
+        padding: 1.4rem 1.5rem;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.02);
+    }
+
+    .metric-instrument-label {
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+    }
+
+    .metric-instrument-value {
+        font-family: var(--font-mono);
+        font-size: 2rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        color: var(--text-charcoal);
+        line-height: 1.1;
+    }
+
+    .metric-instrument-unit {
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: var(--text-muted);
+        margin-left: 4px;
+    }
+
+    .metric-instrument-sub {
+        font-family: var(--font-body);
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        margin-top: 0.4rem;
+        line-height: 1.4;
+    }
+
+    /* === 5. Geometry Visualization Section === */
+    .section-title-wrap {
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .section-eyebrow {
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--accent-olive);
+        font-weight: 700;
+    }
+
+    .section-heading {
+        font-family: var(--font-sans);
+        font-size: 1.35rem;
+        font-weight: 800;
+        letter-spacing: -0.01em;
+        color: var(--text-charcoal);
+        margin: 0.2rem 0 0.3rem 0;
+    }
+
+    /* Compact Visualization Controls */
+    .controls-strip {
+        background: var(--surface-white);
+        border: 1px solid var(--border-gray);
+        border-radius: 8px;
+        padding: 0.75rem 1.25rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    /* Subtle Legend */
+    .legend-strip {
+        display: flex;
+        align-items: center;
+        gap: 1.4rem;
+        flex-wrap: wrap;
+        padding: 0.5rem 0.2rem 1rem 0.2rem;
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+    }
+
+    .legend-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+    }
+
+    .legend-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+    .panel-frame {
+        background: var(--surface-white);
+        border: 1px solid var(--border-gray);
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .panel-tag {
+        font-family: var(--font-mono);
+        font-size: 0.76rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--text-charcoal);
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.4rem;
+        border-bottom: 1px solid var(--border-subtle);
+    }
+
+    /* === 6. Educational "HOW IT WORKS" Section === */
+    .education-card {
+        background: var(--surface-white);
+        border: 1px solid var(--border-gray);
+        border-radius: 12px;
+        padding: 2.2rem 2.4rem;
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .pipeline-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.25rem;
+        margin-top: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .pipeline-step {
+        background: var(--surface-warm);
+        border: 1px solid var(--border-subtle);
+        border-radius: 8px;
+        padding: 1.1rem 1.2rem;
+    }
+
+    .pipeline-num {
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--accent-olive);
+        letter-spacing: 0.1em;
+        margin-bottom: 0.35rem;
+    }
+
+    .pipeline-title {
+        font-family: var(--font-sans);
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: var(--text-charcoal);
+        margin-bottom: 0.35rem;
+    }
+
+    .pipeline-desc {
+        font-family: var(--font-body);
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        line-height: 1.45;
+    }
+
+    .formula-slab {
+        background: var(--surface-warm);
+        border: 1px solid var(--border-gray);
+        border-radius: 8px;
+        padding: 1.5rem 1.8rem;
+        margin-bottom: 1.4rem;
+    }
+
+    .formula-label {
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+        margin-bottom: 0.75rem;
+    }
+
+    .formula-equation {
+        font-family: var(--font-mono);
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--text-charcoal);
+        margin-bottom: 0.75rem;
+    }
+
+    .formula-variables {
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        line-height: 1.6;
+    }
+
+    .formula-note {
+        font-family: var(--font-body);
+        font-size: 0.82rem;
+        color: var(--text-muted);
+        margin-top: 0.75rem;
+        line-height: 1.4;
+    }
+
+    .humorous-line {
+        font-family: var(--font-serif);
+        font-style: italic;
+        font-size: 1.05rem;
+        color: var(--text-secondary);
+        text-align: center;
+        padding-top: 0.5rem;
+    }
+
+    /* ===========================================================================
+       7. ULTRA-OFFICIAL GOVERNMENTAL / BUREAU CERTIFICATE TEMPLATE
+       =========================================================================== */
+    .cert-grand-wrapper {
+        background: #FDFBF7;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 10px 35px rgba(23, 23, 23, 0.06);
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .cert-official-frame {
+        border: 4px double #854D0E;
+        background: #FFFDF9;
+        position: relative;
+        padding: 3rem 3.5rem;
+        box-shadow: inset 0 0 0 2px #FEF3C7, inset 0 0 0 8px #FFFDF9, inset 0 0 0 10px #CA8A04;
+    }
+
+    /* Ornate Corner Elements */
+    .cert-corner-ornament {
+        position: absolute;
+        width: 32px;
+        height: 32px;
+        border: 3px solid #854D0E;
+    }
+    .cert-corner-tl { top: 14px; left: 14px; border-right: none; border-bottom: none; }
+    .cert-corner-tr { top: 14px; right: 14px; border-left: none; border-bottom: none; }
+    .cert-corner-bl { bottom: 14px; left: 14px; border-right: none; border-top: none; }
+    .cert-corner-br { bottom: 14px; right: 14px; border-left: none; border-top: none; }
+
+    .cert-official-header {
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .cert-official-emblem {
         font-size: 3rem;
-        margin-bottom: 10px;
+        line-height: 1;
+        margin-bottom: 0.5rem;
+        display: inline-block;
+        filter: drop-shadow(0 4px 10px rgba(180, 83, 9, 0.35));
+    }
+
+    .cert-supra-motto {
+        font-family: var(--font-diploma);
+        font-size: 0.76rem;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: #854D0E;
+        font-weight: 700;
+        margin-bottom: 0.3rem;
+    }
+
+    .cert-main-bureau-title {
+        font-family: var(--font-diploma);
+        font-size: 1.6rem;
+        font-weight: 900;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: #171717;
+        margin: 0;
+        line-height: 1.2;
+    }
+
+    .cert-bureau-subdivision {
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: #78716C;
+        margin-top: 0.35rem;
+    }
+
+    .cert-reg-code-bar {
+        font-family: var(--font-mono);
+        font-size: 0.74rem;
+        color: #854D0E;
+        background: #FEF9C3;
+        border: 1px dashed #CA8A04;
+        display: inline-block;
+        padding: 0.25rem 1rem;
+        margin-top: 0.6rem;
+        border-radius: 4px;
+        letter-spacing: 0.08em;
+    }
+
+    .cert-filigree-divider {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1.2rem;
+        margin: 1.5rem auto;
+        color: #CA8A04;
+        font-size: 0.95rem;
+    }
+    .cert-filigree-line {
+        height: 1.5px;
+        background: linear-gradient(90deg, transparent, #CA8A04, transparent);
+        width: 140px;
+    }
+
+    .cert-solemn-heading {
+        font-family: var(--font-cert-head);
+        font-size: 2.35rem;
+        font-weight: 900;
+        color: #B45309 !important;
+        background: linear-gradient(135deg, #92400E 0%, #D97706 40%, #CA8A04 70%, #78350F 100%) !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        text-align: center;
+        margin: 0.25rem 0;
+        filter: drop-shadow(0 1px 2px rgba(180, 83, 9, 0.25));
+    }
+
+    .cert-accord-subtitle {
+        font-family: var(--font-serif);
+        font-style: italic;
+        font-size: 0.98rem;
+        color: #57534E;
+        text-align: center;
+        margin-bottom: 1.6rem;
+    }
+
+    .cert-proclamation-text {
+        font-family: var(--font-serif);
+        font-size: 1.06rem;
+        line-height: 1.7;
+        color: #292524;
+        text-align: justify;
+        max-width: 820px;
+        margin: 0 auto 1.8rem auto;
+    }
+
+    /* Official Credential Ledger Table */
+    .cert-ledger-table {
+        width: 100%;
+        max-width: 820px;
+        margin: 0 auto 2rem auto;
+        border-collapse: collapse;
+        border: 2px solid #854D0E;
+        background: #FFFFFF;
+    }
+
+    .cert-ledger-table td {
+        padding: 0.75rem 1rem;
+        border: 1px solid #D6D3D1;
+        font-family: var(--font-mono);
+        font-size: 0.82rem;
+    }
+
+    .cert-ledger-key {
+        background: #FDFBF7;
+        font-weight: 700;
+        color: #44403C;
+        letter-spacing: 0.05em;
+        width: 32%;
+    }
+
+    .cert-ledger-val {
+        color: #171717;
+        font-weight: 600;
+    }
+
+    .cert-ledger-highlight {
+        background: #FFFBEB !important;
+    }
+
+    .cert-stamp-badge-official {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border: 1.5px solid #854D0E;
+        background: #FEF3C7;
+        color: #78350F;
+        font-weight: 800;
+        font-family: var(--font-mono);
+        letter-spacing: 0.1em;
+        border-radius: 4px;
+        text-transform: uppercase;
+    }
+
+    /* Signatures & Seal Section */
+    .cert-sign-wrapper {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        max-width: 820px;
+        margin: 2.2rem auto 1.5rem auto;
+        padding-top: 1rem;
+    }
+
+    .cert-signature-box {
+        text-align: center;
+        width: 250px;
+    }
+
+    .cert-script-sign {
+        font-family: var(--font-script);
+        font-size: 2.2rem;
+        color: #1C1917;
+        line-height: 1;
+        margin-bottom: 0.3rem;
+    }
+
+    .cert-signature-rule {
+        height: 1px;
+        background: #44403C;
+        width: 100%;
+        margin-bottom: 0.4rem;
+    }
+
+    .cert-signatory-name {
+        font-family: var(--font-diploma);
+        font-size: 0.74rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        color: #171717;
+    }
+
+    .cert-signatory-title {
+        font-family: var(--font-serif);
+        font-style: italic;
+        font-size: 0.8rem;
+        color: #57534E;
+    }
+
+    /* Embossed Gold Foil Seal */
+    .cert-seal-embossed {
+        position: relative;
+        width: 115px;
+        height: 115px;
+        border-radius: 50%;
+        background: radial-gradient(circle, #FDE68A 0%, #F59E0B 70%, #B45309 100%);
+        box-shadow: 0 4px 14px rgba(180, 83, 9, 0.45), inset 0 0 0 3px #FEF3C7, inset 0 0 0 5px #B45309;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #78350F;
+        text-align: center;
+        padding: 8px;
+        user-select: none;
+    }
+
+    .cert-seal-embossed::after {
+        content: "";
+        position: absolute;
+        bottom: -22px;
+        left: 36px;
+        width: 18px;
+        height: 30px;
+        background: #991B1B;
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 80%, 0 100%);
+        box-shadow: 1px 2px 5px rgba(0,0,0,0.2);
+    }
+    .cert-seal-embossed::before {
+        content: "";
+        position: absolute;
+        bottom: -22px;
+        right: 36px;
+        width: 18px;
+        height: 30px;
+        background: #B91C1C;
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 80%, 0 100%);
+        box-shadow: 1px 2px 5px rgba(0,0,0,0.2);
+    }
+
+    .cert-seal-txt-top {
+        font-family: var(--font-diploma);
+        font-size: 0.52rem;
+        font-weight: 800;
+        letter-spacing: 0.1em;
+        line-height: 1;
+        margin-bottom: 2px;
+    }
+    .cert-seal-fruit {
+        font-size: 1.4rem;
+        line-height: 1;
+        margin: 2px 0;
+    }
+    .cert-seal-txt-bot {
+        font-family: var(--font-mono);
+        font-size: 0.52rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        line-height: 1;
+    }
+
+    /* Dry Legal Disclaimer Proviso */
+    .cert-solemn-caveat {
+        max-width: 820px;
+        margin: 2rem auto 0 auto;
+        padding-top: 1rem;
+        border-top: 1px dashed #D6D3D1;
+        font-family: var(--font-serif);
+        font-style: italic;
+        font-size: 0.88rem;
+        color: #78716C;
+        text-align: center;
+        line-height: 1.45;
+    }
+
+    /* Custom Button Overrides */
+    .stButton > button {
+        background: #FFFFFF !important;
+        color: #171717 !important;
+        border: 1.5px solid #D6CEBE !important;
+        border-radius: 9px !important;
+        font-family: var(--font-sans) !important;
+        font-size: 0.88rem !important;
+        font-weight: 700 !important;
+        padding: 0.65rem 1.1rem !important;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05) !important;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+    .stButton > button p, 
+    .stButton > button div, 
+    .stButton > button span {
+        color: #171717 !important;
+        font-weight: 700 !important;
+    }
+    .stButton > button:hover {
+        background: #FEF3C7 !important;
+        border-color: #D4AF37 !important;
+        color: #78350F !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 5px 15px rgba(212, 175, 55, 0.22) !important;
+    }
+    .stButton > button:hover p,
+    .stButton > button:hover div,
+    .stButton > button:hover span {
+        color: #78350F !important;
+    }
+    .stButton > button:active {
+        transform: translateY(0) !important;
+    }
+
+    .stDownloadButton > button {
+        background: linear-gradient(135deg, #F4B400, #EAB308) !important;
+        color: #171717 !important;
+        border: 2px solid #CA8A04 !important;
+        border-radius: 8px !important;
+        font-family: var(--font-sans) !important;
+        font-size: 0.9rem !important;
+        font-weight: 800 !important;
+        letter-spacing: 0.06em !important;
+        padding: 0.7rem 1.6rem !important;
+        box-shadow: 0 4px 14px rgba(244, 180, 0, 0.3) !important;
+        transition: all 0.2s ease !important;
+    }
+    .stDownloadButton > button:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 18px rgba(244, 180, 0, 0.45) !important;
+        background: linear-gradient(135deg, #F59E0B, #D97706) !important;
+        color: #FFFFFF !important;
+    }
+
+    /* Responsive Grid Fallbacks */
+    @media (max-width: 768px) {
+        .brand-hero {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+        .measurements-grid {
+            grid-template-columns: 1fr;
+        }
+        .pipeline-grid {
+            grid-template-columns: 1fr;
+        }
+        .score-display-row {
+            flex-direction: column;
+        }
+        .cert-official-frame {
+            padding: 1.5rem 1rem;
+        }
+        .cert-sign-wrapper {
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+        }
     }
     </style>
     """
 )
 
 
-# -----------------------------------------------------------------------------
-# Personality & Dynamic Mascot Engine
-# -----------------------------------------------------------------------------
-def get_personality_profile(curve_score: float) -> Dict[str, str]:
-    """Generates humorous, personality-rich stats based on quantitative curvature."""
-    if curve_score < 5.0:
-        return {
-            "title": "Corporal Cavendish 🫡",
-            "personality": "The Orthogonal Ruler",
-            "quote": "Zero funny business! Perfectly aligned and straight as a laser beam. 10/10 military precision. We do not bend!",
-            "aerodynamic": "Javelin Class (High Penetration)",
-            "peelability": "7.4 / 10 (Slightly awkward thumb angle)",
-            "mario_kart": "Fires straight forward like a Green Shell!",
-            "mood": "straight",
-        }
-    elif curve_score <= 20.0:
-        return {
-            "title": "The Chill Cavendish 😎",
-            "personality": "The Golden Ratio Exemplar",
-            "quote": "Ahh, optimal tropical curve! Peak ergonomics for one-handed peeling in a hammock. This is nature's masterpiece.",
-            "aerodynamic": "Aerodynamic Arc (Gentle Glider)",
-            "peelability": "10.0 / 10 (Gold Standard Ergonomics)",
-            "mario_kart": "Classic highway obstacle. 100% spinout probability.",
-            "mood": "curved",
-        }
-    else:
-        return {
-            "title": "The Cosmic Boomerang 🌀",
-            "personality": "The Gravity-Defying Gymnast",
-            "quote": "WHOA! Did someone launch me out of a cannon?! Throw me into the breeze and I'll fly right back into your fruit bowl!",
-            "aerodynamic": "Boomerang Class (Hypersonic Drift)",
-            "peelability": "8.8 / 10 (Centrifugal force recommended)",
-            "mario_kart": "Homing missile banana. Defies Euclidean geometry!",
-            "mood": "highly_curved",
-        }
-
-
-def render_svg_mascot(curve_score: float) -> str:
-    """
-    Renders an animated SVG cartoon banana mascot whose body physically
-    bends according to the actual Curve Score, returned as a Base64 data URI img tag.
-    """
-    bend_factor = float(np.clip(curve_score * 3.4 + 10, 10, 95))
-    profile = get_personality_profile(curve_score)
-
-    if profile["mood"] == "straight":
-        face_svg = """
-        <line x1="85" y1="120" x2="105" y2="125" stroke="#451a03" stroke-width="4" stroke-linecap="round" />
-        <line x1="115" y1="125" x2="135" y2="120" stroke="#451a03" stroke-width="4" stroke-linecap="round" />
-        <circle cx="95" cy="133" r="5" fill="#1e293b" />
-        <circle cx="125" cy="133" r="5" fill="#1e293b" />
-        <line x1="95" y1="155" x2="125" y2="155" stroke="#451a03" stroke-width="4" stroke-linecap="round" />
-        <circle cx="125" cy="133" r="12" stroke="#d97706" stroke-width="3" fill="rgba(245, 158, 11, 0.2)" />
-        <path d="M 137 135 Q 145 155 130 170" stroke="#d97706" stroke-width="2" fill="none" />
-        """
-    elif profile["mood"] == "curved":
-        face_svg = """
-        <polygon points="80,122 108,122 104,142 84,142" fill="#0f172a" />
-        <polygon points="112,122 140,122 136,142 116,142" fill="#0f172a" />
-        <line x1="108" y1="126" x2="112" y2="126" stroke="#0f172a" stroke-width="4" />
-        <line x1="75" y1="125" x2="80" y2="125" stroke="#0f172a" stroke-width="3" />
-        <line x1="140" y1="125" x2="145" y2="125" stroke="#0f172a" stroke-width="3" />
-        <line x1="86" y1="126" x2="100" y2="136" stroke="#38bdf8" stroke-width="2" />
-        <line x1="118" y1="126" x2="132" y2="136" stroke="#38bdf8" stroke-width="2" />
-        <path d="M 95 154 Q 110 168 128 156" stroke="#451a03" stroke-width="4" fill="none" stroke-linecap="round" />
-        """
-    else:
-        face_svg = """
-        <circle cx="95" cy="128" r="10" fill="#ffffff" stroke="#451a03" stroke-width="2" />
-        <circle cx="125" cy="128" r="10" fill="#ffffff" stroke="#451a03" stroke-width="2" />
-        <circle cx="95" cy="128" r="4.5" fill="#ef4444" />
-        <circle cx="125" cy="128" r="4.5" fill="#ef4444" />
-        <path d="M 85 116 Q 95 106 105 116" stroke="#451a03" stroke-width="3" fill="none" stroke-linecap="round" />
-        <path d="M 115 116 Q 125 106 135 116" stroke="#451a03" stroke-width="3" fill="none" stroke-linecap="round" />
-        <ellipse cx="110" cy="155" rx="14" ry="12" fill="#7f1d1d" stroke="#451a03" stroke-width="3" />
-        <ellipse cx="110" cy="160" rx="9" ry="6" fill="#f43f5e" />
-        <path d="M 148 112 Q 154 107 156 115 Q 156 122 148 119 Z" fill="#0284c7" />
-        """
-
-    ctrl_x = 110 + bend_factor
-    back_ctrl_x = 75 + bend_factor
-
-    svg_markup = f'''<svg width="240" height="270" viewBox="0 0 240 270" xmlns="http://www.w3.org/2000/svg">
-<defs>
-<linearGradient id="bananaGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-<stop offset="0%" stop-color="#fef08a" />
-<stop offset="60%" stop-color="#facc15" />
-<stop offset="100%" stop-color="#eab308" />
-</linearGradient>
-<filter id="bananaGlow" x="-20%" y="-20%" width="140%" height="140%">
-<feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#f59e0b" flood-opacity="0.35" />
-</filter>
-</defs>
-<path d="M 110 35 Q {ctrl_x} 140 105 245 Q {back_ctrl_x} 140 100 35 Z" fill="url(#bananaGradient)" stroke="#b45309" stroke-width="4" filter="url(#bananaGlow)" stroke-linejoin="round" />
-<path d="M 106 42 Q {ctrl_x - 12} 140 103 235" stroke="#fef9c3" stroke-width="3.5" fill="none" stroke-linecap="round" opacity="0.9" />
-<path d="M 100 35 L 110 35 L 113 18 L 97 18 Z" fill="#65a30d" stroke="#365314" stroke-width="3" />
-<ellipse cx="105" cy="18" rx="8" ry="3.5" fill="#365314" />
-<ellipse cx="105" cy="245" rx="5.5" ry="4" fill="#713f12" />
-<ellipse cx="{ctrl_x - 25}" cy="85" rx="4" ry="3" fill="#854d0e" opacity="0.6" />
-<ellipse cx="{ctrl_x - 15}" cy="190" rx="5" ry="3.5" fill="#854d0e" opacity="0.6" />
-<ellipse cx="{ctrl_x - 30}" cy="215" rx="3" ry="2" fill="#854d0e" opacity="0.5" />
-{face_svg}
-</svg>'''
-
-    b64_svg = base64.b64encode(svg_markup.encode('utf-8')).decode('utf-8')
-    return f'<img src="data:image/svg+xml;base64,{b64_svg}" width="240" height="270" alt="Professor Peel Mascot" style="display:block; margin: 10px auto;" />'
-
-
-# -----------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 # Main Application Controller
-# -----------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 def main() -> None:
-    # 1. Top Navigation Bar
-    nav_left, nav_right = st.columns([3.8, 1.4])
-    with nav_left:
-        st.html(
-            """
-            <div class="brand-logo">
-                <span style="font-size: 2.8rem; line-height: 1;">🍌</span>
-                <div>
-                    <div class="brand-title">Banan-AI Vision Lab</div>
-                    <div class="brand-subtitle">Automated subpixel fruit geometry & neural curvature grading</div>
+
+    # ── 1. Premium Brand Header with Logo Image ──
+    _logo_path = os.path.join(os.path.dirname(__file__), "assets", "chill_ethakka_logo.jpg")
+    _logo_b64 = ""
+    if os.path.exists(_logo_path):
+        with open(_logo_path, "rb") as _f:
+            _logo_b64 = base64.b64encode(_f.read()).decode("utf-8")
+    _logo_src = f"data:image/jpeg;base64,{_logo_b64}" if _logo_b64 else ""
+
+    st.html(
+        f"""
+        <header class="brand-hero" style="border-bottom: 1px solid #E5E0D4; padding-bottom: 1rem; margin-bottom: 1.75rem;">
+            <div style="display:flex; flex-direction:column; align-items:center; gap:0.5rem;">
+                <img src="{_logo_src}" alt="CHILL ETHAKKA Logo"
+                     style="max-width: 340px; width: 100%; height: auto; display: block;" />
+                <div class="brand-status" style="margin-top:0.25rem;">
+                    <span class="status-dot"></span>
+                    <span class="status-text">ANALYSIS ENGINE READY</span>
                 </div>
             </div>
-            """
-        )
-    with nav_right:
-        st.markdown('<div style="text-align: right; padding-top: 10px;">', unsafe_allow_html=True)
-        pitch_toggle = st.toggle("🎤 30s Judge Pitch", value=False, help="Open concise elevator pitch for judges.")
-        st.html(
-            """
-            <div class="status-pill" style="margin-top: 6px;">
-                <div class="status-dot"></div> AI Vision Engine v2.4 • Active
-            </div>
-            """
-        )
-        st.markdown('</div>', unsafe_allow_html=True)
-
-    st.html("<hr style='border: 0; border-top: 1px solid #e2e8f0; margin: 0.8rem 0 1.5rem 0;'>")
-
-    # 2. Hackathon Pitch Mode Banner
-    if pitch_toggle:
-        st.html(
-            """
-            <div class="pitch-banner">
-                <div class="pitch-header">
-                    <span>⚡</span> 30-Second Hackathon Elevator Pitch
-                </div>
-                <div style="font-size: 0.98rem; color: #334155; line-height: 1.65;">
-                    <b>The Real-World Problem:</b> In global agricultural export packaging, bananas deviating from crate-curvature thresholds become bruised in transit, resulting in billions in avoidable food waste.<br>
-                    <b>Our CV Solution:</b> We engineered an intelligent pipeline combining <b>Dual-Space Saliency (CIE LAB + HSV)</b> to defeat table-color bleeding, <b>Medial Axis Skeletonization</b> with graph-geodesic spur pruning, and continuous <b>Parametric B-Splines</b> that eradicate raster step inflation.<br>
-                    <b>Commercial Outcome:</b> Real-time, subpixel automated grading of fruit curvature into standardized industrial packaging categories.
-                </div>
-            </div>
-            """
-        )
-
-    # 3. Sidebar Configuration Station
-    st.sidebar.markdown(
+        </header>
         """
-        <div style="font-size: 1.3rem; font-weight: 800; color: #0f172a; margin-bottom: 8px;">
-            🎛️ Control Station
+    )
+
+    # ── 2. Image Ingestion Station with Malayalam Directive ──
+    st.html(
+        """
+        <div class="ingestion-card">
+            <div class="ingestion-eyebrow">OPTICAL SPECIMEN INGESTION</div>
+            <h2 class="ingestion-title">പഴത്തിൻ്റെ ഫോട്ടോ ഇവിടെ ഇടുക</h2>
+            <p class="ingestion-prompt">Upload a clear photograph containing one banana on a contrasting surface.</p>
+            <div class="ingestion-formats">SUPPORTED FORMATS: JPG · JPEG · PNG · WEBP</div>
         </div>
-        """,
+        """
+    )
+
+    uploaded_file = st.file_uploader(
+        "Upload Banana Specimen",
+        type=["png", "jpg", "jpeg", "webp", "avif"],
+        label_visibility="collapsed",
+        help="Upload an optical image containing a single banana.",
+    )
+
+    # Preset sample quick buttons for instant testing
+    st.markdown(
+        "<div style='text-align:center; font-family: var(--font-mono); font-size: 0.76rem; font-weight:700; color: var(--text-secondary); margin: 0.75rem 0 0.4rem 0;'>OR TEST INSTANTLY WITH A REFERENCE SPECIMEN:</div>",
         unsafe_allow_html=True,
     )
+    sample_col1, sample_col2, sample_col3 = st.columns(3)
+    if "selected_sample" not in st.session_state:
+        st.session_state["selected_sample"] = None
 
-    input_mode = st.sidebar.radio(
-        "Select Specimen Source",
-        ["🖼️ Built-in Demo Samples", "📤 Upload Custom Banana"],
-        index=0,
-    )
+    with sample_col1:
+        if st.button("📏 Straight Banana (നേർരേഖ)", use_container_width=True):
+            st.session_state["selected_sample"] = "samples/straight_banana.png"
+    with sample_col2:
+        if st.button("🌙 Curved Banana (സാധാരണ)", use_container_width=True):
+            st.session_state["selected_sample"] = "samples/curved_banana.png"
+    with sample_col3:
+        if st.button("🪃 Boomerang Banana (തീവ്രം)", use_container_width=True):
+            st.session_state["selected_sample"] = "samples/highly_curved_banana.png"
 
-    selected_image = None
-    image_name = "banana_specimen"
+    selected_image: Optional[np.ndarray] = None
+    selected_alpha: Optional[np.ndarray] = None
+    image_name: str = "specimen"
 
-    if input_mode == "📤 Upload Custom Banana":
-        uploaded_file = st.sidebar.file_uploader(
-            "Upload Banana Photo",
-            type=["png", "jpg", "jpeg", "webp"],
-            help="Upload an image containing a single banana.",
-        )
-        if uploaded_file is not None:
-            selected_image = load_image(uploaded_file)
-            image_name = uploaded_file.name
+    if uploaded_file is not None:
+        st.session_state["selected_sample"] = None
+        filename_lower = uploaded_file.name.lower()
+        file_mime = getattr(uploaded_file, "type", "")
+        
+        # Graceful AVIF detection & rejection without exposing raw stream errors
+        if filename_lower.endswith(".avif") or file_mime == "image/avif":
+            st.warning("AVIF images aren't supported yet. Please upload JPG, PNG, or WEBP.")
+            selected_image = None
         else:
-            st.info("👆 Please upload an image of a banana to begin analysis.")
-    else:
-        sample_options = {
-            "Classic Curved Banana (Sample)": "samples/curved_banana.png",
-            "Wild Highly Curved Banana (Sample)": "samples/highly_curved_banana.png",
-            "Ultra Straight Banana (Sample)": "samples/straight_banana.png",
-        }
-        chosen_sample = st.sidebar.selectbox("Pick a reference sample", list(sample_options.keys()))
-        sample_path = sample_options[chosen_sample]
+            try:
+                selected_image, selected_alpha = load_image(uploaded_file, return_alpha=True)
+                image_name = uploaded_file.name
+            except Exception as e:
+                st.warning(f"Could not process image '{uploaded_file.name}': {e}")
+                selected_image = None
+    elif st.session_state.get("selected_sample"):
+        sample_path = st.session_state["selected_sample"]
         if os.path.exists(sample_path):
-            selected_image = load_image(sample_path)
-            image_name = chosen_sample
-        else:
-            st.warning(f"Sample not found at `{sample_path}`. Run `python samples/generate_samples.py`.")
+            try:
+                selected_image, selected_alpha = load_image(sample_path, return_alpha=True)
+                image_name = os.path.basename(sample_path)
+            except Exception as e:
+                st.warning(f"Could not process sample '{sample_path}': {e}")
+                selected_image = None
 
-    # Surface & Background Detection Presets
-    st.sidebar.markdown("---")
-    st.sidebar.markdown("### 🎨 Detection Surface Preset")
-    preset_map = {
-        "🌟 Auto (Smart Multi-Space LAB+HSV)": "auto",
-        "🪵 Wood Table / Countertop (Anti-Bleed)": "wood",
-        "⚪ White / Light Surface (Otsu)": "otsu",
-        "🟢 Green / Unripe Banana": "auto",
-        "⚙️ Custom HSV Manual": "hsv",
-    }
-    selected_preset = st.sidebar.selectbox(
-        "Background Surface",
-        list(preset_map.keys()),
-        index=0,
-        help="Use 'Wood Table' if your banana is resting on a wooden table, cutting board, or brown counter!",
-    )
-    seg_method = preset_map[selected_preset]
-
-    # Fine-Tuning Drawer
-    with st.sidebar.expander("⚙️ Advanced Fine-Tuning", expanded=(selected_preset == "⚙️ Custom HSV Manual")):
-        morph_kernel = st.slider(
-            "Bridge Removal Filter",
-            min_value=3,
-            max_value=25,
-            value=11 if seg_method == "wood" else 7,
-            step=2,
-            help="Snips thin background shadows or wood reflections touching the peel.",
-        )
-
-        h_min = st.slider("Min Hue", 0, 179, 35 if selected_preset == "🟢 Green / Unripe Banana" else DEFAULT_HSV_LOWER[0])
-        h_max = st.slider("Max Hue", 0, 179, DEFAULT_HSV_UPPER[0])
-        s_min = st.slider("Min Saturation", 0, 255, 80 if seg_method == "wood" else DEFAULT_HSV_LOWER[1])
-        v_min = st.slider("Min Brightness", 0, 255, DEFAULT_HSV_LOWER[2])
-
-        custom_lower = (h_min, s_min, v_min)
-        custom_upper = (h_max, 255, 255)
-
-        smoothing = st.slider(
-            "Spline Smoothing Parameter",
-            min_value=0.1,
-            max_value=10.0,
-            value=float(SPLINE_SMOOTHING),
-            step=0.2,
-            help="Degree of cubic B-spline smoothing through skeleton points.",
-        )
-
-        straight_thresh = st.number_input("Straight Threshold (%)", value=float(STRAIGHT_THRESHOLD), step=1.0)
-        curved_thresh = st.number_input("Curved Threshold (%)", value=float(CURVED_THRESHOLD), step=1.0)
-
-    # 4. Processing & Analysis Execution
+    # ── 3. Processing & Results Pipeline ──
     if selected_image is not None:
-        with st.spinner("🍌 Banan-AI is evaluating curvature tensor splines..."):
-            result = analyze_banana(
+        with st.spinner("Executing geometric curvature pipeline..."):
+            result: CurvatureAnalysisResult = analyze_banana(
                 selected_image,
-                segmentation_method=seg_method,
-                hsv_lower=custom_lower,
-                hsv_upper=custom_upper,
-                smoothing=smoothing,
-                straight_threshold=straight_thresh,
-                curved_threshold=curved_thresh,
-                morph_kernel_size=morph_kernel,
+                segmentation_method="auto",
+                hsv_lower=DEFAULT_HSV_LOWER,
+                hsv_upper=DEFAULT_HSV_UPPER,
+                smoothing=None,  # adaptive smoothing (was: float(SPLINE_SMOOTHING))
+                straight_threshold=float(STRAIGHT_THRESHOLD),
+                curved_threshold=float(CURVED_THRESHOLD),
+                morph_kernel_size=7,
+                alpha_mask=selected_alpha,
             )
 
         if not result.success:
-            st.error(f"⚠️ **Analysis Warning**: {result.message}")
-            st.info("💡 **Tip**: If your banana is on a table, select **'🪵 Wood Table / Countertop (Anti-Bleed)'** in the sidebar!")
-            st.image(selected_image, caption="Uploaded Specimen", use_container_width=True)
+            st.error(f"Analysis Notice: {result.message}. Please provide a clear, unobstructed single banana image.")
             return
 
-        # High Curve Score Advisory
-        if result.curve_score > 50.0:
-            st.warning(
-                "💡 **High Curve Advisory**: If the visual overlay shows the green contour bleeding into background wood grain or shadows, switch the preset to **'🪵 Wood Table / Countertop (Anti-Bleed)'** or increase **'Bridge Removal Filter'** in the sidebar!"
-            )
+        # ── 4. Main Result: Dominant Curve Score ──
+        # Dynamic calculation of scale position (normalized to a 0% - 35% standard range)
+        max_scale = max(35.0, float(result.curve_score) * 1.1)
+        scale_pct = float(np.clip((result.curve_score / max_scale) * 100.0, 1.5, 98.5))
 
-        personality = get_personality_profile(result.curve_score)
+        badge_class = (
+            "badge-straight"
+            if result.category == CATEGORY_STRAIGHT
+            else ("badge-curved" if result.category == CATEGORY_CURVED else "badge-highly-curved")
+        )
 
-        # 5. Dynamic Mascot Reaction Stage (Light Mode)
         st.html(
             f"""
-            <div class="mascot-stage">
-                <div class="speech-bubble">
-                    💬 <b>Professor Peel:</b> "{personality['quote']}"
+            <div class="score-hero-card">
+                <div class="score-eyebrow">PRIMARY METRIC</div>
+                <div class="score-label">CURVE SCORE</div>
+                <div class="score-display-row">
+                    <div>
+                        <span class="score-giant-number">{result.curve_score:.2f}</span>
+                        <span class="score-giant-percent">%</span>
+                    </div>
+                    <div>
+                        <span class="classification-badge {badge_class}">{result.category.upper()}</span>
+                    </div>
                 </div>
-                {render_svg_mascot(result.curve_score)}
-                <div class="mascot-title">{personality['title']}</div>
-                <div class="mascot-subtitle">Personality: <b>{personality['personality']}</b></div>
+                
+                <div class="scale-container">
+                    <div class="scale-boundary-labels">
+                        <span>STRAIGHT</span>
+                        <span>CURVED</span>
+                        <span>HIGHLY CURVED</span>
+                    </div>
+                    <div class="scale-track-wrapper">
+                        <div class="scale-track-segment-1"></div>
+                        <div class="scale-track-segment-2"></div>
+                        <div class="scale-track-segment-3"></div>
+                        <div class="scale-indicator-pin" style="left: {scale_pct:.1f}%;">
+                            <div class="scale-indicator-callout">{result.curve_score:.2f}%</div>
+                        </div>
+                    </div>
+                    <div class="scale-axis-ticks">
+                        <span>0%</span>
+                        <span>5%</span>
+                        <span>20%</span>
+                        <span>{max_scale:.0f}%+</span>
+                    </div>
+                </div>
             </div>
             """
         )
 
-        # 6. Primary KPI Bento Grid (Crisp White Light Mode)
-        kpi_col1, kpi_col2, kpi_col3, kpi_col4, kpi_col5 = st.columns(5)
-        with kpi_col1:
+        # ── 5. Secondary Scientific Measurement Cards ──
+        m1, m2, m3 = st.columns(3)
+        with m1:
             st.html(
                 f"""
-                <div class="bento-card" style="text-align: center;">
-                    <div class="kpi-val" style="color: #ca8a04;">{result.curve_score:.2f}%</div>
-                    <div class="kpi-lbl">Curve Score</div>
+                <div class="metric-instrument-card">
+                    <div class="metric-instrument-label">ARC LENGTH (L)</div>
+                    <div class="metric-instrument-value">{result.path_length:.1f}<span class="metric-instrument-unit">px</span></div>
+                    <div class="metric-instrument-sub">Centerline path integral along smoothed spline</div>
                 </div>
                 """
             )
-        with kpi_col2:
-            badge_cls = (
-                "badge-straight"
-                if result.category == CATEGORY_STRAIGHT
-                else ("badge-curved" if result.category == CATEGORY_CURVED else "badge-highly-curved")
-            )
+        with m2:
             st.html(
                 f"""
-                <div class="bento-card" style="text-align: center;">
-                    <div class="{badge_cls}" style="margin-top: 6px;">{result.category}</div>
-                    <div class="kpi-lbl">Category</div>
+                <div class="metric-instrument-card">
+                    <div class="metric-instrument-label">CHORD DISTANCE (D)</div>
+                    <div class="metric-instrument-value">{result.chord_distance:.1f}<span class="metric-instrument-unit">px</span></div>
+                    <div class="metric-instrument-sub">Direct Euclidean distance between endpoints</div>
                 </div>
                 """
             )
-        with kpi_col3:
+        with m3:
             st.html(
                 f"""
-                <div class="bento-card" style="text-align: center;">
-                    <div class="kpi-val">{result.path_length:.1f}<span class="kpi-unit">px</span></div>
-                    <div class="kpi-lbl">Arc Path Length (L)</div>
-                </div>
-                """
-            )
-        with kpi_col4:
-            st.html(
-                f"""
-                <div class="bento-card" style="text-align: center;">
-                    <div class="kpi-val">{result.chord_distance:.1f}<span class="kpi-unit">px</span></div>
-                    <div class="kpi-lbl">Chord Distance (D)</div>
-                </div>
-                """
-            )
-        with kpi_col5:
-            st.html(
-                f"""
-                <div class="bento-card" style="text-align: center;">
-                    <div class="kpi-val">{result.max_deflection:.1f}<span class="kpi-unit">px</span></div>
-                    <div class="kpi-lbl">Max Deflection (Sagitta)</div>
+                <div class="metric-instrument-card">
+                    <div class="metric-instrument-label">MAX DEFLECTION (δ)</div>
+                    <div class="metric-instrument-value">{result.max_deflection:.1f}<span class="metric-instrument-unit">px</span></div>
+                    <div class="metric-instrument-sub">Maximum perpendicular sagitta to chord</div>
                 </div>
                 """
             )
 
-        st.html("<div style='height: 16px;'></div>")
-
-        # 7. Laboratory Workstation Tabs
-        tab_inspect, tab_lab, tab_cv, tab_cert, tab_math = st.tabs(
-            [
-                "🎯 Visual Inspection",
-                "🎛️ Curvature Sandbox",
-                "🔬 4-Panel CV Diagnostics",
-                "📜 Official IBBC Certificate",
-                "📚 Mathematical Engine",
-            ]
+        # ── 6. Geometry Visualization & Controls ──
+        st.html(
+            """
+            <div class="section-title-wrap">
+                <div class="section-eyebrow">MORPHOLOGICAL INSPECTION</div>
+                <div class="section-heading">GEOMETRY VISUALIZATION</div>
+            </div>
+            """
         )
 
-        # TAB 1: Visual Inspection
-        with tab_inspect:
-            st.markdown("### 🎯 Layered Geometric Overlay")
-            tog1, tog2, tog3, tog4, tog5 = st.columns(5)
-            with tog1:
-                show_cont = st.checkbox("🟢 Contour Boundary", value=True)
-            with tog2:
-                show_center = st.checkbox("🔵 Centerline Spine", value=True)
-            with tog3:
-                show_chord = st.checkbox("🟠 Straight Chord", value=True)
-            with tog4:
-                show_ends = st.checkbox("🟡 Endpoints", value=True)
-            with tog5:
-                show_defl = st.checkbox("🟣 Max Deflection", value=True)
+        # Compact Controls Bar
+        ctrl_col1, ctrl_col2, ctrl_col3, ctrl_col4, ctrl_col5, ctrl_col6 = st.columns([1.5, 1, 1, 1, 1, 1])
+        with ctrl_col1:
+            st.markdown("<div style='font-family: var(--font-mono); font-size: 0.78rem; font-weight: 700; padding-top: 6px;'>CONTROLS:</div>", unsafe_allow_html=True)
+        with ctrl_col2:
+            show_cont = st.checkbox("Contour", value=True)
+        with ctrl_col3:
+            show_center = st.checkbox("Centerline", value=True)
+        with ctrl_col4:
+            show_chord = st.checkbox("Chord", value=True)
+        with ctrl_col5:
+            show_ends = st.checkbox("Endpoints", value=True)
+        with ctrl_col6:
+            show_defl = st.checkbox("Deflection", value=True)
 
-            annotated_img = create_annotated_overlay(
-                selected_image,
-                result,
-                show_contour=show_cont,
-                show_centerline=show_center,
-                show_chord=show_chord,
-                show_endpoints=show_ends,
-                show_deflection=show_defl,
-                show_info_card=True,
-            )
+        # Subtle Legend
+        st.html(
+            """
+            <div class="legend-strip">
+                <span class="legend-item"><span class="legend-dot" style="background: #28DC28;"></span>Contour</span>
+                <span class="legend-item"><span class="legend-dot" style="background: #00D7FF;"></span>Centerline</span>
+                <span class="legend-item"><span class="legend-dot" style="background: #FF8C00;"></span>Chord</span>
+                <span class="legend-item"><span class="legend-dot" style="background: #EAB308;"></span>Endpoints</span>
+                <span class="legend-item"><span class="legend-dot" style="background: #FF32D7;"></span>Max Deflection</span>
+            </div>
+            """
+        )
 
-            col_img_a, col_img_b = st.columns(2)
-            with col_img_a:
-                st.image(selected_image, caption="Original Input Specimen", use_container_width=True)
-            with col_img_b:
-                st.image(annotated_img, caption="Detected Geometric Overlay", use_container_width=True)
+        # Generate scientific overlay
+        annotated_img = create_annotated_overlay(
+            selected_image,
+            result,
+            show_contour=show_cont,
+            show_centerline=show_center,
+            show_chord=show_chord,
+            show_endpoints=show_ends,
+            show_deflection=show_defl,
+            show_info_card=False,
+            show_curvature_center=False,
+        )
 
-            with st.expander("👁️ View Isolated Binary Mask (White = Banana, Black = Background)", expanded=False):
-                if result.binary_mask is not None:
-                    st.image(result.binary_mask, use_container_width=True)
-
-        # TAB 2: Live Bend Simulator
-        with tab_lab:
-            st.markdown("### 🎛️ Interactive 'Bend-A-Banana' Virtual Sandbox")
-            st.markdown(
-                "Drag the slider below to physically curve the virtual banana mascot and observe how the mathematical Curve Score computes in real time!"
-            )
-            sim_score = st.slider("Virtual Curvature (%)", min_value=0.0, max_value=60.0, value=float(result.curve_score), step=0.5)
-
-            sim_left, sim_right = st.columns([1, 1.4])
-            with sim_left:
-                st.html(render_svg_mascot(sim_score))
-            with sim_right:
-                sim_data = get_personality_profile(sim_score)
-                st.html(
-                    f"""
-                    <div class="bento-card">
-                        <div style="font-size: 1.3rem; font-weight: 800; color: #ca8a04; margin-bottom: 8px;">
-                            Simulation Diagnostics
-                        </div>
-                        <p style="margin: 6px 0;"><b>Simulated Score:</b> <span style="font-size: 1.6rem; color: #0284c7; font-weight: 900;">{sim_score:.1f}%</span></p>
-                        <p style="margin: 6px 0;"><b>Archetype:</b> <span style="color: #15803d; font-weight: 700;">{sim_data['personality']}</span></p>
-                        <p style="margin: 6px 0;"><b>Aerodynamics:</b> {sim_data['aerodynamic']}</p>
-                        <p style="margin: 6px 0;"><b>Peelability Rating:</b> {sim_data['peelability']}</p>
-                        <p style="margin: 6px 0;"><b>Mario Kart Hazard:</b> {sim_data['mario_kart']}</p>
-                        <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 12px 0;">
-                        <p style="font-size: 0.88rem; color: #64748b; line-height: 1.5;">
-                            <b>Mathematical Principle:</b> As curvature increases, the perimeter arc distance ($L$) grows while the straight-line chord ($D$) shrinks, producing an exponential climb in the Curve Score metric!
-                        </p>
-                    </div>
-                    """
-                )
-
-        # TAB 3: 4-Panel CV Diagnostics
-        with tab_cv:
-            st.markdown("### 🔬 4-Panel Computer Vision Pipeline Inspection")
-            diag_figure = create_diagnostic_figure(selected_image, result, theme="light")
-            st.pyplot(diag_figure)
-
-        # TAB 4: Official IBBC Certificate
-        with tab_cert:
-            st.markdown("### 📜 Official Certificate of Banana Curvature")
-            cert_id = f"IBBC-{abs(hash(image_name)) % 1000000:06d}"
+        # Display two panels: ORIGINAL (COLOR) and GEOMETRY ANALYSIS
+        panel_color, panel_analysis = st.columns(2)
+        with panel_color:
             st.html(
-                f"""
-                <div class="cert-container">
-                    <div class="cert-seal">🍌</div>
-                    <div style="font-family: var(--font-display); font-size: 2rem; font-weight: 900; color: #d97706; letter-spacing: 1px;">
-                        INTERNATIONAL BUREAU OF BANANA CURVATURE
+                """
+                <div class="panel-tag">ORIGINAL (COLOR)</div>
+                """
+            )
+            st.image(selected_image, use_container_width=True)
+        with panel_analysis:
+            st.html(
+                """
+                <div class="panel-tag">GEOMETRY ANALYSIS</div>
+                """
+            )
+            st.image(annotated_img, use_container_width=True)
+
+        # ── 7. Diagnostic Breakdown (Matplotlib 4-Stage Figure) ──
+        with st.expander("DIAGNOSTIC BREAKDOWN", expanded=False):
+            diag_fig = create_diagnostic_figure(selected_image, result, theme="light")
+            st.pyplot(diag_fig, use_container_width=True)
+
+        # ── 7.5. Absurd Botanical Metrology: Pazham Jathakam & Boomerang Simulator ──
+        st.html(
+            """
+            <div class="section-title-wrap" style="margin-top: 2rem;">
+                <div class="section-eyebrow">OCCULT & BALLISTIC METROLOGY DIVISION</div>
+                <div class="section-heading">പഴ ജാതകവും എയറോഡൈനാമിക്സും (HOROSCOPE & FLIGHT)</div>
+            </div>
+            """
+        )
+        absurd_hub_html = render_absurd_interactive_hub({
+            "curve_score": float(result.curve_score),
+            "category": str(result.category),
+            "path_length": float(result.path_length),
+            "chord_distance": float(result.chord_distance),
+            "max_deflection": float(result.max_deflection),
+        })
+        components.html(absurd_hub_html, height=720, scrolling=False)
+
+        # ── 8. Grand Completely Official Laboratory Certificate ──
+        cert_id = f"IBBC-SPEC-{abs(hash(image_name)) % 1000000:06d}"
+        timestamp_str = time.strftime("%d %B %Y • %H:%M:%S UTC")
+
+        st.html(
+            f"""
+            <div class="cert-grand-wrapper">
+                <div class="cert-official-frame">
+                    <div class="cert-corner-ornament cert-corner-tl"></div>
+                    <div class="cert-corner-ornament cert-corner-tr"></div>
+                    <div class="cert-corner-ornament cert-corner-bl"></div>
+                    <div class="cert-corner-ornament cert-corner-br"></div>
+
+                    <div class="cert-official-header">
+                        <div class="cert-official-emblem">🍌</div>
+                        <div class="cert-supra-motto">★ REPUBLIC OF BOTANICAL METROLOGY ★</div>
+                        <div class="cert-main-bureau-title">THE INTERNATIONAL BUREAU OF BANANA CURVATURE</div>
+                        <div class="cert-bureau-subdivision">DIRECTORATE GENERAL OF PHYSICAL GEOMETRY • HER MAJESTY'S CALIBRATED RECORD</div>
+                        <div class="cert-reg-code-bar">OFFICIAL REGISTRATION: <b>12-SEP-2026</b> &nbsp;|&nbsp; DISPATCH CODIFICATION: <b>CLASS-A1</b></div>
                     </div>
-                    <div style="font-size: 0.95rem; color: #64748b; margin-bottom: 18px; letter-spacing: 0.05em;">
-                        OFFICIAL GLOBAL CERTIFICATE OF GEOMETRIC VERIFICATION
+
+                    <div class="cert-filigree-divider">
+                        <div class="cert-filigree-line"></div>
+                        <span>❖ &nbsp; ❖ &nbsp; ❖</span>
+                        <div class="cert-filigree-line"></div>
                     </div>
-                    <p style="font-size: 1.1rem; color: #1e293b; max-width: 650px; margin: 0 auto;">
-                        This document certifies that specimen <b>{image_name}</b> (Serial: <code>{cert_id}</code>)<br>
-                        has undergone automated subpixel computer vision analysis and is officially verified as:
+
+                    <div class="cert-solemn-heading">CHILL ETHAKKA</div>
+
+
+                    <p class="cert-proclamation-text">
+                        <b>BE IT KNOWN UNTO ALL LEARNED PERSONS AND GOVERNING BODIES</b>, that the natural botanical specimen designated <i>"{image_name}"</i> was duly submitted to the Division of Physical Metrology, whereupon rigorous computer-vision medial-axis skeletonization, non-Euclidean chordal arc-length integration, and perpendicular sagitta deflection metrics were meticulously analyzed, determined, and recorded in the official archives:
                     </p>
-                    <div style="font-family: var(--font-display); font-size: 2.4rem; font-weight: 900; color: #0284c7; margin: 18px 0;">
-                        {result.category.upper()} (SCORE: {result.curve_score:.2f}%)
+
+                    <table class="cert-ledger-table">
+                        <tbody>
+                            <tr>
+                                <td class="cert-ledger-key">OFFICIAL BANANA ID</td>
+                                <td class="cert-ledger-val font-mono">{cert_id}</td>
+                                <td class="cert-ledger-key">DATE OF AUDIT</td>
+                                <td class="cert-ledger-val font-mono">{timestamp_str}</td>
+                            </tr>
+                            <tr class="cert-ledger-highlight">
+                                <td class="cert-ledger-key">CURVE SCORE (PRIMARY)</td>
+                                <td class="cert-ledger-val font-mono" style="font-size: 1.15rem; color: #9A3412;"><b>{result.curve_score:.2f}%</b></td>
+                                <td class="cert-ledger-key">OFFICIAL CLASSIFICATION</td>
+                                <td class="cert-ledger-val"><span class="cert-stamp-badge-official">{result.category.upper()}</span></td>
+                            </tr>
+                            <tr>
+                                <td class="cert-ledger-key">ARC LENGTH (L)</td>
+                                <td class="cert-ledger-val font-mono">{result.path_length:.1f} px</td>
+                                <td class="cert-ledger-key">CHORD DISTANCE (D)</td>
+                                <td class="cert-ledger-val font-mono">{result.chord_distance:.1f} px</td>
+                            </tr>
+                            <tr>
+                                <td class="cert-ledger-key">MAX DEFLECTION (δ)</td>
+                                <td class="cert-ledger-val font-mono">{result.max_deflection:.1f} px</td>
+                                <td class="cert-ledger-key">GEOMETRIC STATUS</td>
+                                <td class="cert-ledger-val font-mono" style="color: #15803D; font-weight: 700;">CERTIFIED {result.category.upper()}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="cert-sign-wrapper">
+                        <div class="cert-signature-box">
+                            <div class="cert-script-sign">Dr.Kumar Kubera</div>
+                            <div class="cert-signature-rule"></div>
+                            <div class="cert-signatory-name">DR. Kumar kubera, Ph.D.</div>
+                            <div class="cert-signatory-title">High Commissioner of Curvilinear Produce</div>
+                        </div>
+
+                        <div class="cert-seal-embossed">
+                            <div class="cert-seal-txt-top">IBBC BUREAU</div>
+                            <div class="cert-seal-fruit">🍌</div>
+                            <div class="cert-seal-txt-bot">OFFICIAL SEAL</div>
+                        </div>
+
+                        <div class="cert-signature-box">
+                            <div class="cert-script-sign">Prof. Pachalam Bhasy</div>
+                            <div class="cert-signature-rule"></div>
+                            <div class="cert-signatory-name">PROF. Pachalam Bhasy, D.Sc.</div>
+                            <div class="cert-signatory-title">Keeper of the Standard Banana Spline</div>
+                        </div>
                     </div>
-                    <div style="display: flex; justify-content: space-around; max-width: 600px; margin: 20px auto; font-size: 0.95rem; color: #334155;">
-                        <div>📏 <b>Arc Length:</b> {result.path_length:.1f} px</div>
-                        <div>📐 <b>Chord Distance:</b> {result.chord_distance:.1f} px</div>
-                        <div>🎯 <b>Max Deflection:</b> {result.max_deflection:.1f} px</div>
-                    </div>
-                    <div style="margin-top: 30px; font-size: 0.85rem; color: #64748b;">
-                        Authorized by: <b>Professor Peel, Chief Fruit Geometer</b> • 100% Potassium Guaranteed
+
+                    <div class="cert-solemn-caveat">
+                        <b>LEGAL DISCLAIMER & STATUTORY PROVISO:</b> This certificate has absolutely no practical value. It is issued strictly as a solemn celebration of absurd geometric precision and carries zero commercial, legal, culinary, or nutritional validity in any jurisdiction on Earth.
                     </div>
                 </div>
-                """
-            )
+            </div>
+            """
+        )
 
-            # JSON Certificate Download
-            cert_payload = {
-                "certificate_id": cert_id,
-                "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
-                "specimen": image_name,
-                "metrics": result.to_dict(),
-                "personality": personality,
-            }
+        cert_payload = {
+            "certificate_id": cert_id,
+            "timestamp": timestamp_str,
+            "specimen": image_name,
+            "curve_score": round(result.curve_score, 4),
+            "category": result.category,
+            "arc_length_px": round(result.path_length, 2),
+            "chord_distance_px": round(result.chord_distance, 2),
+            "max_deflection_px": round(result.max_deflection, 2),
+            "status": f"CERTIFIED {result.category.upper()}",
+            "authority": "International Bureau of Banana Curvature",
+            "disclaimer": "This certificate has absolutely no practical value.",
+        }
+
+        col_left, col_btn, col_right = st.columns([1, 2, 1])
+        with col_btn:
             st.download_button(
-                label="📥 Download Official JSON Certificate",
+                label="DOWNLOAD OFFICIAL CERTIFICATE (JSON)",
                 data=json.dumps(cert_payload, indent=2),
-                file_name=f"{cert_id}_certificate.json",
+                file_name=f"{cert_id}.json",
                 mime="application/json",
+                use_container_width=True,
             )
 
-        # TAB 5: Mathematical Engine
-        with tab_math:
-            st.markdown("### 📚 The Science & Computer Vision Methodology")
-            st.markdown(
-                r"""
-                #### Core Mathematical Formulation
-                $$\text{Curve Score} = \left( \frac{\text{Centerline Path Length } (L) - \text{Straight-Line Distance } (D)}{\text{Straight-Line Distance } (D)} \right) \times 100$$
-                
-                - **Straight Chord ($D$)**: Euclidean distance connecting the two tips:
-                  $$D = \sqrt{(x_2 - x_1)^2 + (y_2 - y_1)^2}$$
-                - **Centerline Arc Length ($L$)**: Numerical integration along a smooth parametric cubic B-spline:
-                  $$L = \int_{u=0}^{1} \sqrt{\left(\frac{dx}{du}\right)^2 + \left(\frac{dy}{du}\right)^2} \, du$$
-                
-                #### Why Discrete Pixel Grids Fail Without Splines
-                On rasterized digital image grids, calculating distance by summing adjacent pixels introduces diagonal Manhattan/Chebyshev grid stepping artifacts ($\sqrt{2} \approx 1.414$ px per step). This artificially inflates path lengths by $5\%\text{–}10\%$. By fitting a parametric B-spline (`scipy.interpolate.splprep`) through the topological skeleton, our engine calculates true subpixel continuous arc lengths.
-                
-                #### Geodesic Graph Spur Pruning
-                Rough peel spots and stem cutoffs naturally create spurious skeletal branches. We construct an 8-connected graph using NetworkX and determine the longest geodesic path between candidate endpoints to isolate the true anatomical spine.
-                
-                #### Multi-Space Saliency (CIE LAB + HSV)
-                Standard HSV often confuses yellowish-brown wooden tables with banana yellow. Our engine measures the $b^*$ blue-yellow axis against $a^*$ reddish-brown wood grain in CIE LAB space, reducing table background bleeding to $<0.01\%$.
-                """
-            )
+
 
 
 if __name__ == "__main__":

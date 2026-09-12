@@ -1,0 +1,328 @@
+{
+  "label": "improved",
+  "timestamp_utc": "2026-09-12T03:43:55.048042+00:00",
+  "ground_truth": {
+    "straight_line": {
+      "success": true,
+      "truth": {
+        "arc_length": 300.0,
+        "chord_distance": 300.0,
+        "max_deflection": 0.0,
+        "curve_score": 0.0
+      },
+      "measured": {
+        "arc_length": 292.3703115274584,
+        "chord_distance": 292.3608367125874,
+        "max_deflection": 1.002536806814738,
+        "curve_score": 0.0032407948265357677
+      },
+      "relative_error_pct": {
+        "arc_length": 2.543229490847201,
+        "chord_distance": 2.5463877624708666,
+        "max_deflection": Infinity
+      },
+      "curve_score_abs_error_pts": 0.0032407948265357677
+    },
+    "circular_arc_gentle": {
+      "success": true,
+      "truth": {
+        "arc_length": 449.9999999999999,
+        "chord_distance": 448.3143974207976,
+        "max_deflection": 16.843382040721565,
+        "curve_score": 0.3759867157735153
+      },
+      "measured": {
+        "arc_length": 448.42761667111154,
+        "chord_distance": 446.73998349228236,
+        "max_deflection": 16.78191984895518,
+        "curve_score": 0.3777663162442965
+      },
+      "relative_error_pct": {
+        "arc_length": 0.3494185175307445,
+        "chord_distance": 0.35118522571949934,
+        "max_deflection": 0.3649041007191431
+      },
+      "curve_score_abs_error_pts": 0.0017796004707812396
+    },
+    "circular_arc_moderate": {
+      "success": true,
+      "truth": {
+        "arc_length": 264.0,
+        "chord_distance": 248.44268829381554,
+        "max_deflection": 38.4261622436328,
+        "curve_score": 6.261931801263532
+      },
+      "measured": {
+        "arc_length": 256.357899493693,
+        "chord_distance": 243.14434125278925,
+        "max_deflection": 34.709427303757664,
+        "curve_score": 5.434450241704813
+      },
+      "relative_error_pct": {
+        "arc_length": 2.8947350402677934,
+        "chord_distance": 2.132623454291523,
+        "max_deflection": 9.672407346614479
+      },
+      "curve_score_abs_error_pts": 0.827481559558719
+    },
+    "circular_arc_strong": {
+      "success": true,
+      "truth": {
+        "arc_length": 528.0000000000001,
+        "chord_distance": 410.09719782557954,
+        "max_deflection": 140.28128411018008,
+        "curve_score": 28.74996532518771
+      },
+      "measured": {
+        "arc_length": 531.1525323744593,
+        "chord_distance": 410.3731321497964,
+        "max_deflection": 139.49830550561407,
+        "curve_score": 29.431605230084944
+      },
+      "relative_error_pct": {
+        "arc_length": 0.5970705254657491,
+        "chord_distance": 0.06728510355103849,
+        "max_deflection": 0.5581490143411022
+      },
+      "curve_score_abs_error_pts": 0.681639904897235
+    },
+    "quadratic": {
+      "success": true,
+      "truth": {
+        "arc_length": 309.83773111320664,
+        "chord_distance": 300.0,
+        "max_deflection": 33.7499978895699,
+        "curve_score": 3.279243704402215
+      },
+      "measured": {
+        "arc_length": 305.47651211365803,
+        "chord_distance": 296.0022655322272,
+        "max_deflection": 32.32103271284111,
+        "curve_score": 3.200734482351216
+      },
+      "relative_error_pct": {
+        "arc_length": 1.4075816343862704,
+        "chord_distance": 1.3325781559242575,
+        "max_deflection": 4.233971158766785
+      },
+      "curve_score_abs_error_pts": 0.07850922205099886
+    },
+    "cubic_bezier": {
+      "success": true,
+      "truth": {
+        "arc_length": 468.6922132796909,
+        "chord_distance": 320.0,
+        "max_deflection": 134.99999155827965,
+        "curve_score": 46.46631664990341
+      },
+      "measured": {
+        "arc_length": 464.30604357783136,
+        "chord_distance": 322.6825863437332,
+        "max_deflection": 131.66387115937343,
+        "curve_score": 43.889401916233474
+      },
+      "relative_error_pct": {
+        "arc_length": 0.9358315708228168,
+        "chord_distance": 0.8383082324166226,
+        "max_deflection": 2.4712004500133697
+      },
+      "curve_score_abs_error_pts": 2.5769147336699376
+    }
+  },
+  "stability": {
+    "resize": {
+      "curve_score": {
+        "mean": 5.277218104662591,
+        "std": 0.2953090793198554,
+        "cv_pct": 5.595923334283652
+      },
+      "deflection_ratio": {
+        "mean": 0.14216185988288724,
+        "std": 0.0027804182928699173,
+        "cv_pct": 1.9558117030548297
+      },
+      "categories_seen": [
+        "Curved",
+        "Straight"
+      ],
+      "per_variant": {
+        "0.5x": {
+          "success": true,
+          "curve_score": 5.6466407277837085,
+          "category": "Curved"
+        },
+        "1.0x": {
+          "success": true,
+          "curve_score": 5.261196960681077,
+          "category": "Curved"
+        },
+        "2.0x": {
+          "success": true,
+          "curve_score": 4.923816625522989,
+          "category": "Straight"
+        }
+      }
+    },
+    "rotation": {
+      "curve_score": {
+        "mean": 5.336723777289695,
+        "std": 0.24352294356267107,
+        "cv_pct": 4.563154356966672
+      },
+      "deflection_ratio": {
+        "mean": 0.140361233935236,
+        "std": 0.0031107420290597534,
+        "cv_pct": 2.216240155380138
+      },
+      "categories_seen": [
+        "Curved"
+      ],
+      "per_variant": {
+        "0deg": {
+          "success": true,
+          "curve_score": 5.261196960681077,
+          "category": "Curved"
+        },
+        "45deg": {
+          "success": true,
+          "curve_score": 5.050930764165154,
+          "category": "Curved"
+        },
+        "90deg": {
+          "success": true,
+          "curve_score": 5.311767860921571,
+          "category": "Curved"
+        },
+        "135deg": {
+          "success": true,
+          "curve_score": 5.722999523390978,
+          "category": "Curved"
+        }
+      }
+    },
+    "brightness": {
+      "curve_score": {
+        "mean": 5.20327048676204,
+        "std": 0.0579264739190366,
+        "cv_pct": 1.1132704722234008
+      },
+      "deflection_ratio": {
+        "mean": 0.14023662555137972,
+        "std": 0.0007405848323525227,
+        "cv_pct": 0.5280965863523207
+      },
+      "categories_seen": [
+        "Curved"
+      ],
+      "per_variant": {
+        "-30": {
+          "success": true,
+          "curve_score": 5.261196960681077,
+          "category": "Curved"
+        },
+        "+30": {
+          "success": true,
+          "curve_score": 5.145344012843004,
+          "category": "Curved"
+        }
+      }
+    },
+    "contrast": {
+      "curve_score": {
+        "mean": 5.252272123315535,
+        "std": 0.007437344539171775,
+        "cv_pct": 0.14160242204809634
+      },
+      "deflection_ratio": {
+        "mean": 0.14085856793620855,
+        "std": 8.13294464538511e-05,
+        "cv_pct": 0.05773837377835848
+      },
+      "categories_seen": [
+        "Curved"
+      ],
+      "per_variant": {
+        "0.7x": {
+          "success": true,
+          "curve_score": 5.244834778776363,
+          "category": "Curved"
+        },
+        "1.3x": {
+          "success": true,
+          "curve_score": 5.259709467854707,
+          "category": "Curved"
+        }
+      }
+    },
+    "noise": {
+      "curve_score": {
+        "mean": 5.559953205257514,
+        "std": 0.017642847811807805,
+        "cv_pct": 0.3173200773546917
+      },
+      "deflection_ratio": {
+        "mean": 0.14478307908002647,
+        "std": 0.0002952604367296857,
+        "cv_pct": 0.2039329724204065
+      },
+      "categories_seen": [
+        "Curved"
+      ],
+      "per_variant": {
+        "sigma10": {
+          "success": true,
+          "curve_score": 5.577596053069322,
+          "category": "Curved"
+        },
+        "sigma20": {
+          "success": true,
+          "curve_score": 5.542310357445706,
+          "category": "Curved"
+        }
+      }
+    },
+    "crop": {
+      "curve_score": {
+        "mean": 5.460707756683136,
+        "std": 0.04114736883561321,
+        "cv_pct": 0.7535171386026771
+      },
+      "deflection_ratio": {
+        "mean": 0.14340590866664019,
+        "std": 0.0006106888374216579,
+        "cv_pct": 0.4258463567503753
+      },
+      "categories_seen": [
+        "Curved"
+      ],
+      "per_variant": {
+        "10pct": {
+          "success": true,
+          "curve_score": 5.419560387847523,
+          "category": "Curved"
+        },
+        "25pct": {
+          "success": true,
+          "curve_score": 5.501855125518749,
+          "category": "Curved"
+        }
+      }
+    }
+  },
+  "segmentation_robustness": {
+    "rectangle_area": 68000,
+    "banana_area_estimate": 15275,
+    "winning_contour_area": 13875.5,
+    "winning_centroid_inside_banana_bbox": true,
+    "picked_banana_not_rectangle": true,
+    "analyze_banana_success": true,
+    "analyze_banana_category": "Curved",
+    "segmentation_method": "saliency_wood"
+  },
+  "timing": {
+    "n_runs": 20,
+    "mean_ms": 744.1465600015363,
+    "median_ms": 743.5343500037561,
+    "max_ms": 867.9038999980548
+  }
+}
