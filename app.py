@@ -5,6 +5,7 @@ A premium, sophisticated computer-vision instrument for geometric banana curvatu
 """
 
 import os
+import io
 import json
 import time
 import base64
@@ -31,17 +32,58 @@ from src.visualization import create_annotated_overlay, create_diagnostic_figure
 from src.fun_modules import render_absurd_interactive_hub
 
 # ---------------------------------------------------------------------------
+# Asset loading
+# ---------------------------------------------------------------------------
+@st.cache_data(show_spinner=False)
+def asset_data_uri(path: str, max_px: int = 680, quality: int = 82, _mtime: float = 0.0) -> str:
+    """
+    Return an inline data URI for an image asset, downscaled and recompressed.
+
+    Streamlit re-sends inline HTML on every rerun, so an oversized asset costs
+    its full weight again on every single interaction. The source logo is
+    1024x1024 (~494KB, ~659KB once base64-encoded) but is never displayed wider
+    than 340px, so serving it at 2x that width costs ~63KB instead -- the same
+    thing on screen for about a tenth of the bytes.
+
+    Cached on (path, size, quality, mtime) so swapping the file in assets/ picks
+    the new one up automatically. Falls back to the raw bytes if anything about
+    the re-encode fails, so a new or unusual asset can never break the page.
+    """
+    if not os.path.exists(path):
+        return ""
+    try:
+        with Image.open(path) as im:
+            im = im.convert("RGB")
+            if max(im.size) > max_px:
+                im.thumbnail((max_px, max_px), Image.LANCZOS)
+            buf = io.BytesIO()
+            im.save(buf, "JPEG", quality=quality, optimize=True, progressive=True)
+            data = buf.getvalue()
+        raw_size = os.path.getsize(path)
+        if len(data) >= raw_size:  # already well-optimised; don't make it bigger
+            with open(path, "rb") as f:
+                data = f.read()
+    except Exception:
+        try:
+            with open(path, "rb") as f:
+                data = f.read()
+        except Exception:
+            return ""
+    return f"data:image/jpeg;base64,{base64.b64encode(data).decode('utf-8')}"
+
+
+def _asset_uri(name: str, max_px: int = 680) -> str:
+    path = os.path.join(os.path.dirname(__file__), "assets", name)
+    mtime = os.path.getmtime(path) if os.path.exists(path) else 0.0
+    return asset_data_uri(path, max_px=max_px, _mtime=mtime)
+
+
+# ---------------------------------------------------------------------------
 # Fullscreen Comic Splash Screen ("MELCOW")
 # ---------------------------------------------------------------------------
 def render_splash_screen():
-    img_path = os.path.join(os.path.dirname(__file__), "assets", "melcow.jpg")
-    b64_str = ""
-    if os.path.exists(img_path):
-        with open(img_path, "rb") as f:
-            b64_str = base64.b64encode(f.read()).decode("utf-8")
-    
-    img_src = f"data:image/jpeg;base64,{b64_str}" if b64_str else ""
-    
+    img_src = _asset_uri("melcow.jpg", max_px=900)
+
     splash_script = f"""
     <script>
     (function() {{
@@ -101,6 +143,23 @@ st.set_page_config(
 )
 
 render_splash_screen()
+
+# Start the font download early. The stylesheet below also @imports these exact
+# families, but an @import cannot begin fetching until the CSS around it has been
+# downloaded and parsed -- two serialised round trips before any text can render.
+# Emitting the same URL as a <link> up here starts it immediately; the @import
+# then resolves from cache. The @import is deliberately kept as the fallback, so
+# fonts still load correctly even if these tags are ever sanitised away.
+# NOTE: must be st.markdown -- st.html runs DOMPurify, which strips <link>.
+st.markdown(
+    """
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,400;1,600&family=Alex+Brush&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&display=swap">
+    """,
+    unsafe_allow_html=True,
+)
 
 # ---------------------------------------------------------------------------
 # Premium Scientific Laboratory & Official Certificate Design System
@@ -1194,12 +1253,9 @@ st.html(
 def main() -> None:
 
     # ── 1. Premium Brand Header with Logo Image ──
-    _logo_path = os.path.join(os.path.dirname(__file__), "assets", "chill_ethakka_logo.jpg")
-    _logo_b64 = ""
-    if os.path.exists(_logo_path):
-        with open(_logo_path, "rb") as _f:
-            _logo_b64 = base64.b64encode(_f.read()).decode("utf-8")
-    _logo_src = f"data:image/jpeg;base64,{_logo_b64}" if _logo_b64 else ""
+    # Served at 2x its 340px display width: visually identical, ~90% fewer bytes
+    # re-sent on every rerun.
+    _logo_src = _asset_uri("chill_ethakka_logo.jpg", max_px=680)
 
     st.html(
         f"""
@@ -1240,18 +1296,21 @@ def main() -> None:
         "<div style='text-align:center; font-family: var(--font-mono); font-size: 0.76rem; font-weight:700; color: var(--text-secondary); margin: 0.75rem 0 0.4rem 0;'>OR TEST INSTANTLY WITH A REFERENCE SPECIMEN:</div>",
         unsafe_allow_html=True,
     )
-    sample_col1, sample_col2, sample_col3 = st.columns(3)
+    sample_col0, sample_col1, sample_col2, sample_col3 = st.columns(4)
     if "selected_sample" not in st.session_state:
         st.session_state["selected_sample"] = None
 
+    with sample_col0:
+        if st.button("🍌 Model Specimen (മോഡൽ)", use_container_width=True):
+            st.session_state["selected_sample"] = "samples/model_banana.png"
     with sample_col1:
-        if st.button("📏 Straight Banana (നേർരേഖ)", use_container_width=True):
+        if st.button("📏 Straight (നേർരേഖ)", use_container_width=True):
             st.session_state["selected_sample"] = "samples/straight_banana.png"
     with sample_col2:
-        if st.button("🌙 Curved Banana (സാധാരണ)", use_container_width=True):
+        if st.button("🌙 Curved (സാധാരണ)", use_container_width=True):
             st.session_state["selected_sample"] = "samples/curved_banana.png"
     with sample_col3:
-        if st.button("🪃 Boomerang Banana (തീവ്രം)", use_container_width=True):
+        if st.button("🪃 Boomerang (തീവ്രം)", use_container_width=True):
             st.session_state["selected_sample"] = "samples/highly_curved_banana.png"
 
     selected_image: Optional[np.ndarray] = None
